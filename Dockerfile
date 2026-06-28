@@ -19,7 +19,16 @@ RUN npm run build
 # ── Stage 2: PHP dependencies (must match runtime PHP 8.4) ───────────────────
 FROM php:8.4-cli-bookworm AS vendor
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 WORKDIR /app
 
