@@ -6,6 +6,46 @@ export PORT
 
 echo "→ CEMAPROF container starting on port ${PORT}"
 
+db_configured() {
+    [ -n "${DATABASE_URL:-}" ] \
+        || [ -n "${DB_URL:-}" ] \
+        || [ -n "${DB_HOST:-}" ] \
+        || [ -n "${PGHOST:-}" ]
+}
+
+sync_db_env() {
+    export DB_CONNECTION="${DB_CONNECTION:-pgsql}"
+
+    if [ -n "${DATABASE_URL:-}" ]; then
+        export DB_URL="${DB_URL:-$DATABASE_URL}"
+        db_host="$(php -r 'echo parse_url(getenv("DATABASE_URL"), PHP_URL_HOST) ?: "";' 2>/dev/null || true)"
+        echo "→ DATABASE_URL detected (host: ${db_host:-?})"
+        return 0
+    fi
+
+    if [ -n "${DB_URL:-}" ]; then
+        echo "→ DB_URL detected"
+        return 0
+    fi
+
+    if [ -n "${PGHOST:-}" ]; then
+        export DB_HOST="${DB_HOST:-$PGHOST}"
+        export DB_PORT="${DB_PORT:-${PGPORT:-5432}}"
+        export DB_DATABASE="${DB_DATABASE:-${PGDATABASE:-}}"
+        export DB_USERNAME="${DB_USERNAME:-${PGUSER:-}}"
+        export DB_PASSWORD="${DB_PASSWORD:-${PGPASSWORD:-}}"
+        echo "→ PostgreSQL vars detected (host: ${DB_HOST})"
+        return 0
+    fi
+
+    if [ -n "${DB_HOST:-}" ]; then
+        echo "→ DB_HOST detected (${DB_HOST})"
+        return 0
+    fi
+
+    return 1
+}
+
 # Render Nginx config from template (Railway injects $PORT)
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 
@@ -25,21 +65,7 @@ chmod -R ug+rwx storage bootstrap/cache
 php artisan storage:link --force 2>/dev/null || true
 
 # Wait for PostgreSQL then migrate
-if [ -n "${DATABASE_URL:-}" ] || [ -n "${DB_URL:-}" ] || [ -n "${DB_HOST:-}" ] || [ -n "${PGHOST:-}" ]; then
-    export DB_CONNECTION="${DB_CONNECTION:-pgsql}"
-
-    if [ -n "${DATABASE_URL:-}" ] && [ -z "${DB_URL:-}" ]; then
-        export DB_URL="${DATABASE_URL}"
-    fi
-
-    if [ -n "${PGHOST:-}" ] && [ -z "${DB_HOST:-}" ]; then
-        export DB_HOST="${PGHOST}"
-        export DB_PORT="${DB_PORT:-${PGPORT:-5432}}"
-        export DB_DATABASE="${DB_DATABASE:-${PGDATABASE}}"
-        export DB_USERNAME="${DB_USERNAME:-${PGUSER}}"
-        export DB_PASSWORD="${DB_PASSWORD:-${PGPASSWORD}}"
-    fi
-
+if db_configured && sync_db_env; then
     echo "→ Waiting for database…"
     attempt=0
     max_attempts=30
@@ -61,12 +87,21 @@ if [ -n "${DATABASE_URL:-}" ] || [ -n "${DB_URL:-}" ] || [ -n "${DB_HOST:-}" ] |
     fi
 else
     echo "⚠ No database configured — skipping migrations"
+    echo "  Railway: service Web → Variables → Add Reference → Postgres → DATABASE_URL"
+    echo "  (Do not type \${{Postgres.DATABASE_URL}} manually — use the reference picker.)"
 fi
 
+php artisan config:clear --no-interaction 2>/dev/null || true
+
 if [ "${APP_ENV:-production}" = "production" ]; then
-    php artisan config:cache --no-interaction
-    php artisan route:cache --no-interaction
-    php artisan view:cache --no-interaction
+    if db_configured; then
+        sync_db_env
+        php artisan config:cache --no-interaction
+        php artisan route:cache --no-interaction
+        php artisan view:cache --no-interaction
+    else
+        echo "⚠ Skipping config:cache — DATABASE_URL missing (would bake 127.0.0.1 defaults)"
+    fi
 fi
 
 echo "→ Starting Nginx + PHP-FPM"

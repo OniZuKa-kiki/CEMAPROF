@@ -67,6 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/99-opcache.ini
 COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/99-uploads.ini
+COPY docker/php-fpm/zz-env.conf /usr/local/etc/php-fpm.d/zz-env.conf
 COPY docker/nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
