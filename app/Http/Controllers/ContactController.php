@@ -44,7 +44,9 @@ class ContactController extends Controller
         $validated['product_slugs'] = ! empty($productSlugs) ? $productSlugs : null;
         $validated['product_slug'] = $productSlugs[0] ?? ($validated['product_slug'] ?? null);
 
-        ContactMessage::create($validated);
+        $contactMessage = ContactMessage::create($validated);
+
+        \App\Services\ContactMailService::sendForMessage($contactMessage);
 
         return redirect()
             ->back()

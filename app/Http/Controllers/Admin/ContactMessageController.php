@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\Admin\ReplyContactMessageRequest;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
+use App\Services\ContactMailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -80,5 +82,20 @@ class ContactMessageController extends Controller
         $message->delete();
 
         return redirect()->route('admin.messages.index')->with('success', 'Message supprimé.');
+    }
+
+    public function reply(ReplyContactMessageRequest $request, ContactMessage $message): RedirectResponse
+    {
+        ContactMailService::sendAdminReply(
+            $message,
+            $request->validated('body'),
+            $request->user()->name,
+        );
+
+        if (! $message->is_read) {
+            $message->update(['is_read' => true]);
+        }
+
+        return back()->with('success', 'Réponse envoyée par email au client.');
     }
 }

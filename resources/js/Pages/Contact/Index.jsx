@@ -29,7 +29,6 @@ function buildDefaultMessage(products) {
 }
 
 function ContactForm({ quoteProducts = [], prefilledSubject }) {
-    const { flash } = usePage().props;
     const { toast } = useToast();
     const { items, setItemsFromList, removeItem, clearCart } = useQuoteCart();
     const messageInitialized = useRef(false);
@@ -67,15 +66,6 @@ function ContactForm({ quoteProducts = [], prefilledSubject }) {
         }
     }, [items, setData]);
 
-    useEffect(() => {
-        if (flash?.success) {
-            toast({ title: 'Message envoyé !', description: flash.success, variant: 'success' });
-            clearCart();
-            messageInitialized.current = false;
-            reset();
-        }
-    }, [flash?.success, toast, reset, clearCart]);
-
     const handleSubmit = (e) => {
         e.preventDefault();
         post('/contact', {
@@ -83,6 +73,7 @@ function ContactForm({ quoteProducts = [], prefilledSubject }) {
             onSuccess: () => {
                 clearCart();
                 messageInitialized.current = false;
+                reset();
                 toast({
                     title: 'Message envoyé !',
                     description: 'Nous vous répondrons sous 24h.',

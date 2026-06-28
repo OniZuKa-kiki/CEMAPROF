@@ -16,8 +16,10 @@ ENV VITE_APP_NAME=${VITE_APP_NAME}
 RUN npm run build
 
 
-# ── Stage 2: PHP dependencies ───────────────────────────────────────────────
-FROM composer:2 AS vendor
+# ── Stage 2: PHP dependencies (must match runtime PHP 8.4) ───────────────────
+FROM php:8.4-cli-bookworm AS vendor
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
@@ -34,7 +36,7 @@ RUN composer dump-autoload --optimize --no-dev
 
 
 # ── Stage 3: production image (Nginx + PHP-FPM) ───────────────────────────────
-FROM php:8.3-fpm-bookworm
+FROM php:8.4-fpm-bookworm
 
 LABEL maintainer="CEMAPROF"
 

@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Lock, Shield } from 'lucide-react';
 import SiteLogo from '@/Components/SiteLogo';
 import { Button } from '@/Components/ui/button';
@@ -73,6 +73,12 @@ export default function AdminLogin({ status }) {
                                 <Lock className="mr-2 h-4 w-4" />
                                 {processing ? 'Connexion...' : 'Se connecter'}
                             </Button>
+
+                            <p className="text-center text-sm">
+                                <Link href="/forgot-password" className="text-primary hover:underline">
+                                    Mot de passe oublié ?
+                                </Link>
+                            </p>
                         </form>
                     </div>
 

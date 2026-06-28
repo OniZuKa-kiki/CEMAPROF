@@ -25,7 +25,21 @@ chmod -R ug+rwx storage bootstrap/cache
 php artisan storage:link --force 2>/dev/null || true
 
 # Wait for PostgreSQL then migrate
-if [ -n "${DB_URL:-}" ] || [ -n "${DATABASE_URL:-}" ] || [ -n "${DB_HOST:-}" ]; then
+if [ -n "${DATABASE_URL:-}" ] || [ -n "${DB_URL:-}" ] || [ -n "${DB_HOST:-}" ] || [ -n "${PGHOST:-}" ]; then
+    export DB_CONNECTION="${DB_CONNECTION:-pgsql}"
+
+    if [ -n "${DATABASE_URL:-}" ] && [ -z "${DB_URL:-}" ]; then
+        export DB_URL="${DATABASE_URL}"
+    fi
+
+    if [ -n "${PGHOST:-}" ] && [ -z "${DB_HOST:-}" ]; then
+        export DB_HOST="${PGHOST}"
+        export DB_PORT="${DB_PORT:-${PGPORT:-5432}}"
+        export DB_DATABASE="${DB_DATABASE:-${PGDATABASE}}"
+        export DB_USERNAME="${DB_USERNAME:-${PGUSER}}"
+        export DB_PASSWORD="${DB_PASSWORD:-${PGPASSWORD}}"
+    fi
+
     echo "→ Waiting for database…"
     attempt=0
     max_attempts=30

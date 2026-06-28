@@ -31,6 +31,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('messages', [ContactMessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [ContactMessageController::class, 'show'])->name('messages.show');
         Route::patch('messages/{message}/toggle-read', [ContactMessageController::class, 'toggleRead'])->name('messages.toggle-read');
+        Route::post('messages/{message}/reply', [ContactMessageController::class, 'reply'])->name('messages.reply');
         Route::delete('messages/{message}', [ContactMessageController::class, 'destroy'])->name('messages.destroy');
 
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');

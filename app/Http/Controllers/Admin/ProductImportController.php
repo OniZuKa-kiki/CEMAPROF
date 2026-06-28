@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Mail\ProductImportCompletedMail;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Services\MailRecipientService;
 use App\Services\ProductImportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -41,6 +45,26 @@ class ProductImportController extends Controller
         ]);
 
         $result = $importer->importFromCsv($request->file('file'));
+
+        if (MailRecipientService::isFeatureEnabled('import_completed')) {
+            $mailable = new ProductImportCompletedMail(
+                $result['created'],
+                $result['skipped'],
+                array_slice($result['errors'], 0, 20),
+                $request->user()->name,
+            );
+
+            foreach (MailRecipientService::notificationRecipients() as $recipient) {
+                try {
+                    Mail::to($recipient)->send($mailable);
+                } catch (\Throwable $exception) {
+                    Log::warning('Import completion mail failed', [
+                        'recipient' => $recipient,
+                        'error' => $exception->getMessage(),
+                    ]);
+                }
+            }
+        }
 
         $message = "{$result['created']} produit(s) importé(s).";
 
