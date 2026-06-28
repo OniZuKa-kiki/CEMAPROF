@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Product;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class HomeController extends Controller
+{
+    public function index(): Response
+    {
+        return Inertia::render('Home/Index', [
+            'featuredProducts' => Product::query()
+                ->where('is_featured', true)
+                ->where('is_active', true)
+                ->with('category')
+                ->latest()
+                ->limit(8)
+                ->get(),
+            'categories' => Category::query()
+                ->where('is_active', true)
+                ->withCount(['products' => fn ($q) => $q->where('is_active', true)])
+                ->get(),
+            'stats' => [
+                ['label' => 'Produits', 'value' => 500, 'suffix' => '+'],
+                ['label' => "Ans d'expérience", 'value' => 10, 'suffix' => '+'],
+                ['label' => 'Clients', 'value' => 1000, 'suffix' => '+'],
+                ['label' => 'Marques', 'value' => 50, 'suffix' => '+'],
+            ],
+        ]);
+    }
+}
