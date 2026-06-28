@@ -3,6 +3,8 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+$pgsqlUrl = env('DB_URL') ?: env('DATABASE_URL');
+
 return [
 
     /*
@@ -84,20 +86,25 @@ return [
             ]) : [],
         ],
 
-        'pgsql' => [
-            'driver' => 'pgsql',
-            'url' => env('DB_URL', env('DATABASE_URL')),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
-        ],
+        'pgsql' => array_merge(
+            ['driver' => 'pgsql'],
+            $pgsqlUrl ? [
+                'url' => $pgsqlUrl,
+            ] : [
+                'host' => env('DB_HOST', env('PGHOST', '127.0.0.1')),
+                'port' => env('DB_PORT', env('PGPORT', '5432')),
+                'database' => env('DB_DATABASE', env('PGDATABASE', 'laravel')),
+                'username' => env('DB_USERNAME', env('PGUSER', 'root')),
+                'password' => env('DB_PASSWORD', env('PGPASSWORD', '')),
+            ],
+            [
+                'charset' => env('DB_CHARSET', 'utf8'),
+                'prefix' => '',
+                'prefix_indexes' => true,
+                'search_path' => 'public',
+                'sslmode' => env('DB_SSLMODE', 'prefer'),
+            ],
+        ),
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
