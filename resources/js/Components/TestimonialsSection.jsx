@@ -38,10 +38,10 @@ function TestimonialCard({ testimonial }) {
             </div>
             <p className="flex-1 text-sm leading-relaxed text-muted-foreground">&ldquo;{testimonial.text}&rdquo;</p>
             <div className="mt-6 flex items-center gap-3">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white ${testimonial.color}`}>
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${testimonial.color}`}>
                     {testimonial.initials}
                 </div>
-                <div>
+                <div className="min-w-0">
                     <p className="font-semibold text-foreground">{testimonial.name}</p>
                     <p className="text-xs text-muted-foreground">{testimonial.role}</p>
                 </div>
@@ -70,16 +70,18 @@ export default function TestimonialsSection() {
                 </div>
 
                 <div className="md:hidden">
-                    <Carousel opts={{ align: 'start', loop: true }}>
-                        <CarouselContent>
+                    <Carousel opts={{ align: 'center', loop: true }} className="testimonials-carousel">
+                        <CarouselContent className="ml-0">
                             {testimonials.map((t, i) => (
-                                <CarouselItem key={i}>
+                                <CarouselItem key={i} className="basis-full pl-0">
                                     <TestimonialCard testimonial={t} />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
-                        <CarouselPrevious className="left-0" />
-                        <CarouselNext className="right-0" />
+                        <div className="testimonials-carousel__nav" aria-label="Navigation des témoignages">
+                            <CarouselPrevious className="testimonials-carousel__arrow" />
+                            <CarouselNext className="testimonials-carousel__arrow" />
+                        </div>
                     </Carousel>
                 </div>
             </div>

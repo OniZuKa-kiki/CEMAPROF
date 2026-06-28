@@ -35,8 +35,13 @@ class ProductController extends Controller
 
         match ($request->input('sort', 'recent')) {
             'name' => $query->orderBy('name'),
+            'name_desc' => $query->orderByDesc('name'),
             'popular' => $query->orderByRaw("CASE badge WHEN 'populaire' THEN 1 WHEN 'promo' THEN 2 WHEN 'nouveau' THEN 3 ELSE 4 END")
                 ->orderBy('name'),
+            'promo' => $query->orderByRaw("CASE badge WHEN 'promo' THEN 1 WHEN 'populaire' THEN 2 WHEN 'nouveau' THEN 3 ELSE 4 END")
+                ->orderBy('name'),
+            'nouveau' => $query->orderByRaw("CASE badge WHEN 'nouveau' THEN 1 WHEN 'populaire' THEN 2 WHEN 'promo' THEN 3 ELSE 4 END")
+                ->orderByDesc('created_at'),
             default => $query->latest(),
         };
 

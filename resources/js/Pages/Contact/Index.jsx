@@ -88,17 +88,18 @@ function ContactForm({ quoteProducts = [], prefilledSubject }) {
             <CardContent className="p-6 sm:p-8">
                 <h2 className="mb-6 text-2xl font-bold">Envoyez-nous un message</h2>
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Honeypot anti-spam — laisser vide */}
-                    <input
-                        type="text"
-                        name="website"
-                        value={data.website}
-                        onChange={(e) => setData('website', e.target.value)}
-                        className="hidden"
-                        tabIndex={-1}
-                        autoComplete="off"
-                        aria-hidden="true"
-                    />
+                    <div className="honeypot-field" aria-hidden="true">
+                        <label htmlFor="website">Ne pas remplir</label>
+                        <input
+                            type="text"
+                            id="website"
+                            name="website"
+                            value={data.website}
+                            onChange={(e) => setData('website', e.target.value)}
+                            tabIndex={-1}
+                            autoComplete="off"
+                        />
+                    </div>
 
                     <div className="grid gap-5 sm:grid-cols-2">
                         <div className="space-y-2">

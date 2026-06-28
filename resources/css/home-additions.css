@@ -9,6 +9,38 @@
    HERO — SPLIT LAYOUT
 ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Mobile hero background — visible below lg */
+.hero-mobile-visual {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-mobile-visual__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.35;
+}
+
+.hero-mobile-visual__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(10 18 64 / 0.55) 0%,
+    rgb(10 18 64 / 0.92) 55%,
+    #0a1240 100%
+  );
+}
+
+@media (min-width: 1024px) {
+  .hero-mobile-visual {
+    display: none;
+  }
+}
+
 .hero-split {
   /* Deep navy — different from the blue gradient default */
   background: #0a1240;
@@ -93,6 +125,23 @@
   background: rgb(255 255 255 / 0.08);
   color: #93c5fd;
   flex-shrink: 0;
+}
+
+/* Hero trust grid — more breathing room on mobile */
+.hero-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem 1.25rem;
+  max-width: 20rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .hero-trust-grid {
+    gap: 1.25rem 2rem;
+    max-width: 24rem;
+  }
 }
 
 /* ── Dot grid for dark background ─────────────────────────────── */

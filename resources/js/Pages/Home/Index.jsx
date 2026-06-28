@@ -30,6 +30,14 @@ export default function Home({ featuredProducts, categories, stats }) {
 
             <section className="hero-split noise-overlay relative min-h-screen overflow-hidden">
                 <div className="absolute inset-0 bg-dot-grid-dark" />
+                <div className="hero-mobile-visual lg:hidden" aria-hidden="true">
+                    <img
+                        src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=900&q=80"
+                        alt=""
+                        className="hero-mobile-visual__img"
+                    />
+                    <div className="hero-mobile-visual__overlay" />
+                </div>
 
                 <div className="hero-split__text relative z-10 flex flex-col justify-center">
                     <div className="hero-label animate-fade-up">
@@ -65,7 +73,7 @@ export default function Home({ featuredProducts, categories, stats }) {
                         </Button>
                     </div>
 
-                    <div className="animate-fade-up delay-700 mt-14 pt-8 border-t border-white/12 grid grid-cols-2 gap-x-8 gap-y-3.5 max-w-xs">
+                    <div className="animate-fade-up delay-700 hero-trust-grid mt-10 border-t border-white/12 pt-6 sm:mt-14 sm:pt-8">
                         {trustItems.map((item, i) => (
                             <div key={i} className="flex items-center gap-2.5">
                                 <div className="mini-trust-icon">
