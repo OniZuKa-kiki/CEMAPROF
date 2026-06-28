@@ -6,6 +6,24 @@ export PORT
 
 echo "→ CEMAPROF container starting on port ${PORT}"
 
+# Build DATABASE_URL from Railway PG* references when the full URL ref is missing
+if [ -z "${DATABASE_URL:-}" ] && [ -n "${PGHOST:-}" ] && [ -n "${PGUSER:-}" ] && [ -n "${PGDATABASE:-}" ]; then
+    DATABASE_URL="$(php -r '
+        $host = getenv("PGHOST");
+        $port = getenv("PGPORT") ?: "5432";
+        $user = getenv("PGUSER");
+        $pass = getenv("PGPASSWORD") ?: "";
+        $db = getenv("PGDATABASE");
+        $query = getenv("PGSSLMODE") ? "?sslmode=" . rawurlencode(getenv("PGSSLMODE")) : "";
+        echo "postgresql://" . rawurlencode($user) . ":" . rawurlencode($pass) . "@{$host}:{$port}/" . rawurlencode($db) . $query;
+    ')"
+    export DATABASE_URL
+    echo "→ DATABASE_URL built from PGHOST/PGUSER/PGDATABASE"
+fi
+
+# Diagnostic (no secrets)
+echo "→ DB check: DATABASE_URL=$([ -n "${DATABASE_URL:-}" ] && echo set || echo missing) PGHOST=${PGHOST:-missing} PGDATABASE=${PGDATABASE:-missing}"
+
 db_configured() {
     [ -n "${DATABASE_URL:-}" ] \
         || [ -n "${DB_URL:-}" ] \
@@ -19,7 +37,7 @@ sync_db_env() {
     if [ -n "${DATABASE_URL:-}" ]; then
         export DB_URL="${DB_URL:-$DATABASE_URL}"
         db_host="$(php -r 'echo parse_url(getenv("DATABASE_URL"), PHP_URL_HOST) ?: "";' 2>/dev/null || true)"
-        echo "→ DATABASE_URL detected (host: ${db_host:-?})"
+        echo "→ DATABASE_URL ready (host: ${db_host:-?})"
         return 0
     fi
 
@@ -34,7 +52,7 @@ sync_db_env() {
         export DB_DATABASE="${DB_DATABASE:-${PGDATABASE:-}}"
         export DB_USERNAME="${DB_USERNAME:-${PGUSER:-}}"
         export DB_PASSWORD="${DB_PASSWORD:-${PGPASSWORD:-}}"
-        echo "→ PostgreSQL vars detected (host: ${DB_HOST})"
+        echo "→ PostgreSQL vars ready (host: ${DB_HOST})"
         return 0
     fi
 
@@ -87,8 +105,10 @@ if db_configured && sync_db_env; then
     fi
 else
     echo "⚠ No database configured — skipping migrations"
-    echo "  Railway: service Web → Variables → Add Reference → Postgres → DATABASE_URL"
-    echo "  (Do not type \${{Postgres.DATABASE_URL}} manually — use the reference picker.)"
+    echo "  1. Railway canvas → click PostgreSQL → note its exact name (e.g. Postgres)"
+    echo "  2. Web service → Variables → New Variable → Reference"
+    echo "  3. Pick Postgres service → DATABASE_URL (or PGHOST + PGUSER + PGDATABASE + PGPASSWORD + PGPORT)"
+    echo "  4. Redeploy. Logs must show: DATABASE_URL=set"
 fi
 
 php artisan config:clear --no-interaction 2>/dev/null || true
@@ -100,7 +120,7 @@ if [ "${APP_ENV:-production}" = "production" ]; then
         php artisan route:cache --no-interaction
         php artisan view:cache --no-interaction
     else
-        echo "⚠ Skipping config:cache — DATABASE_URL missing (would bake 127.0.0.1 defaults)"
+        echo "⚠ Skipping config:cache — no database env vars (would bake 127.0.0.1 defaults)"
     fi
 fi
 
