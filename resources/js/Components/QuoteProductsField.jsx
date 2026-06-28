@@ -38,6 +38,7 @@ export default function QuoteProductsField({ items, onRemove, onClearAll }) {
                         <Package className="h-3 w-3 shrink-0 opacity-60" aria-hidden="true" />
                         <span className="quote-products-chip__name" title={item.name}>
                             {item.name}
+                            {item.quantity > 1 ? ` × ${item.quantity}` : ''}
                         </span>
                         <button
                             type="button"

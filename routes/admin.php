@@ -14,7 +14,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('login', [AdminAuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:admin-login');
 
-    Route::middleware(['auth', 'admin'])->group(function () {
+    Route::middleware(['auth', 'admin', 'admin.session'])->group(function () {
         Route::post('logout', [AdminAuthenticatedSessionController::class, 'destroy'])->name('logout');
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

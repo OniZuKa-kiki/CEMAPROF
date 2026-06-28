@@ -10,7 +10,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Textarea } from '@/Components/ui/textarea';
 import { Label } from '@/Components/ui/label';
-import { NativeSelect } from '@/Components/ui/native-select';
+import FormSelect from '@/Components/FormSelect';
 import { Card, CardContent } from '@/Components/ui/card';
 import { useToast } from '@/Components/ui/use-toast';
 import { subjectOptions, formatWhatsAppUrl } from '@/lib/utils';
@@ -21,11 +21,19 @@ function buildDefaultMessage(products) {
         return '';
     }
 
+    const formatLine = (product) => {
+        const qty = product.quantity > 1 ? ` (quantité : ${product.quantity})` : '';
+        const price = product.price != null ? ` — ${product.price} MAD / unité` : '';
+
+        return `- ${product.name}${qty}${price}`;
+    };
+
     if (products.length === 1) {
-        return `Bonjour, je souhaite obtenir des informations concernant le produit : ${products[0].name}.`;
+        const product = products[0];
+        return `Bonjour, je souhaite commander / obtenir un devis pour :\n${formatLine(product)}`;
     }
 
-    return `Bonjour, je souhaite obtenir un devis pour les produits suivants :\n${products.map((product) => `- ${product.name}`).join('\n')}`;
+    return `Bonjour, je souhaite commander / obtenir un devis pour les produits suivants :\n${products.map(formatLine).join('\n')}`;
 }
 
 function ContactForm({ quoteProducts = [], prefilledSubject }) {
@@ -149,15 +157,13 @@ function ContactForm({ quoteProducts = [], prefilledSubject }) {
 
                     <div className="space-y-2">
                         <Label htmlFor="subject">Sujet *</Label>
-                        <NativeSelect
+                        <FormSelect
                             id="subject"
                             value={String(data.subject ?? 'devis')}
-                            onChange={(e) => setData('subject', e.target.value)}
-                        >
-                            {subjectOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </NativeSelect>
+                            onValueChange={(value) => setData('subject', value)}
+                            options={subjectOptions}
+                            placeholder="Choisir un sujet"
+                        />
                         {errors.subject && <p className="text-sm text-accent">{errors.subject}</p>}
                     </div>
 
@@ -201,7 +207,8 @@ function ContactForm({ quoteProducts = [], prefilledSubject }) {
 }
 
 export default function ContactIndex({ quoteProducts = [], prefilledSubject }) {
-    const { siteSettings, whatsappNumber } = usePage().props;
+    const { siteSettings, whatsappNumber, company } = usePage().props;
+    const mapsUrl = siteSettings?.google_maps_url || company?.maps_url;
 
     return (
         <MainLayout>
@@ -211,7 +218,7 @@ export default function ContactIndex({ quoteProducts = [], prefilledSubject }) {
 
             <PageHero
                 title="Contactez-nous"
-                subtitle="Notre équipe vous répond sous 24 heures"
+                subtitle="Réponse rapide par formulaire ou WhatsApp"
                 eyebrow="Nous sommes à votre écoute"
                 breadcrumb={[{ label: 'Contact' }]}
             />
@@ -229,6 +236,16 @@ export default function ContactIndex({ quoteProducts = [], prefilledSubject }) {
                                         <div>
                                             <p className="font-semibold">Adresse</p>
                                             <p className="text-sm text-muted-foreground">{siteSettings.address}</p>
+                                            {mapsUrl && (
+                                                <a
+                                                    href={mapsUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-1 inline-block text-sm font-medium text-primary hover:underline"
+                                                >
+                                                    Ouvrir dans Google Maps
+                                                </a>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -315,7 +332,7 @@ export default function ContactIndex({ quoteProducts = [], prefilledSubject }) {
                                     style={{ border: 0 }}
                                     allowFullScreen
                                     loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
+                                    referrerPolicy="strict-origin-when-cross-origin"
                                     title="Localisation CEMAPROF"
                                 />
                             </div>

@@ -34,6 +34,7 @@ class AdminAuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+        $request->session()->put('admin_last_activity', time());
 
         if (! Auth::user()->isAdmin()) {
             Auth::logout();

@@ -10,9 +10,12 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produits', [ProductController::class, 'index'])->name('products');
+Route::get('/api/products/suggest', [ProductController::class, 'suggest'])->name('products.suggest');
 Route::get('/produits/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
+Route::get('/faq', [PageController::class, 'faq'])->name('faq');
+Route::get('/cgv', [PageController::class, 'cgv'])->name('cgv');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:contact')
@@ -23,6 +26,8 @@ Route::get('/sitemap.xml', function () {
         ['loc' => url('/'), 'priority' => '1.0'],
         ['loc' => url('/produits'), 'priority' => '0.9'],
         ['loc' => url('/a-propos'), 'priority' => '0.7'],
+        ['loc' => url('/faq'), 'priority' => '0.6'],
+        ['loc' => url('/cgv'), 'priority' => '0.5'],
         ['loc' => url('/contact'), 'priority' => '0.8'],
     ];
 

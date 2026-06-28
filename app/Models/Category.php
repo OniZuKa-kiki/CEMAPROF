@@ -28,4 +28,11 @@ class Category extends Model
     {
         return $this->hasMany(Product::class)->where('is_active', true);
     }
+
+    public function scopeCatalog($query)
+    {
+        return $query
+            ->where('is_active', true)
+            ->whereIn('slug', config('cemaprof.category_slugs', []));
+    }
 }

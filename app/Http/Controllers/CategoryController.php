@@ -13,12 +13,12 @@ class CategoryController extends Controller
     {
         $category = Category::query()
             ->where('slug', $slug)
-            ->where('is_active', true)
+            ->catalog()
             ->firstOrFail();
 
         $products = Product::query()
+            ->catalog()
             ->where('category_id', $category->id)
-            ->where('is_active', true)
             ->with('category')
             ->latest()
             ->paginate(12);

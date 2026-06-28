@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import {
     ToastProvider as RadixToastProvider,
     ToastViewport,
@@ -12,22 +12,22 @@ import { cn } from '@/lib/utils';
 
 const variantConfig = {
     success: {
-        className: 'toast--success border-emerald-200',
+        className: 'toast--success',
         icon: CheckCircle2,
-        iconClass: 'bg-emerald-50 text-emerald-600',
-        progressClass: 'bg-emerald-500',
+        iconClass: 'toast-icon--success',
+        glowClass: 'toast-glow--success',
     },
     destructive: {
-        className: 'toast--destructive border-red-200',
+        className: 'toast--destructive',
         icon: AlertCircle,
-        iconClass: 'bg-red-50 text-red-600',
-        progressClass: 'bg-red-500',
+        iconClass: 'toast-icon--destructive',
+        glowClass: 'toast-glow--destructive',
     },
     default: {
-        className: 'toast--default border-primary/20',
-        icon: Info,
-        iconClass: 'bg-primary/10 text-primary',
-        progressClass: 'bg-primary',
+        className: 'toast--default',
+        icon: Sparkles,
+        iconClass: 'toast-icon--default',
+        glowClass: 'toast-glow--default',
     },
 };
 
@@ -35,7 +35,7 @@ export function Toaster() {
     const { toasts } = useToast();
 
     return (
-        <RadixToastProvider swipeDirection="right" duration={5000}>
+        <RadixToastProvider swipeDirection="right" duration={4500}>
             {toasts.map(({ id, title, description, variant = 'default', open }) => {
                 const config = variantConfig[variant] || variantConfig.default;
                 const Icon = config.icon;
@@ -44,17 +44,18 @@ export function Toaster() {
                     <Toast
                         key={id}
                         open={open}
-                        className={cn(config.className)}
+                        className={cn('toast-shell', config.className)}
                     >
+                        <span className={cn('toast-glow', config.glowClass)} aria-hidden="true" />
                         <span className={cn('toast-icon', config.iconClass)} aria-hidden="true">
-                            <Icon className="h-4 w-4" />
+                            <Icon className="h-5 w-5" />
                         </span>
-                        <div className="min-w-0 flex-1 pt-0.5">
+                        <div className="toast-body">
                             {title && <ToastTitle>{title}</ToastTitle>}
                             {description && <ToastDescription>{description}</ToastDescription>}
                         </div>
                         <ToastClose />
-                        <span className={cn('toast-progress', config.progressClass)} aria-hidden="true" />
+                        <span className="toast-timer" aria-hidden="true" />
                     </Toast>
                 );
             })}

@@ -6,7 +6,7 @@ import { formatWhatsAppUrl } from '@/lib/utils';
 export default function PageCta({
     eyebrow = 'Devis personnalisé',
     title = 'Un projet ? Parlons-en.',
-    description = 'Notre équipe technique vous répond sous 24h et établit un devis sur mesure, sans engagement.',
+    description = 'Contactez-nous pour un devis personnalisé, sans engagement.',
     contactHref = '/contact?subject=devis',
     whatsappMessage = 'Bonjour CEMAPROF, je souhaite un devis personnalisé.',
 }) {

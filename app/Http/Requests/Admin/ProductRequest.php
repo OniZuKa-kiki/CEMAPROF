@@ -22,6 +22,7 @@ class ProductRequest extends FormRequest
             'category_id' => ['required', 'exists:categories,id'],
             'short_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
+            'price' => ['nullable', 'numeric', 'min:0'],
             'badge' => ['nullable', Rule::in(['nouveau', 'populaire', 'promo'])],
             'is_featured' => ['boolean'],
             'is_active' => ['boolean'],

@@ -147,6 +147,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'short_description' => $request->short_description,
             'description' => $request->description,
+            'price' => $request->filled('price') ? $request->price : null,
             'badge' => $request->badge ?: null,
             'is_featured' => $request->boolean('is_featured'),
             'is_active' => $request->boolean('is_active', true),

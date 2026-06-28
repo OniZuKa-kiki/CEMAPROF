@@ -15,7 +15,8 @@ class ContactController extends Controller
     public function index(Request $request): Response
     {
         $slugs = $this->resolveProductSlugs($request);
-        $quoteProducts = $this->loadQuoteProducts($slugs);
+        $quantities = $this->resolveProductQuantities($request);
+        $quoteProducts = $this->loadQuoteProducts($slugs, $quantities);
 
         return Inertia::render('Contact/Index', [
             'product' => $quoteProducts[0] ?? null,
@@ -56,7 +57,11 @@ class ContactController extends Controller
     private function resolveProductSlugs(Request $request): array
     {
         if ($request->filled('products')) {
-            return array_values(array_filter(array_map('trim', explode(',', $request->string('products')))));
+            return array_values(array_filter(array_map(function (string $part) {
+                $part = trim($part);
+
+                return explode(':', $part)[0];
+            }, explode(',', $request->string('products')))));
         }
 
         if ($request->filled('product')) {
@@ -66,7 +71,33 @@ class ContactController extends Controller
         return [];
     }
 
-    private function loadQuoteProducts(array $slugs): array
+    private function resolveProductQuantities(Request $request): array
+    {
+        if (! $request->filled('products')) {
+            return [];
+        }
+
+        $quantities = [];
+
+        foreach (explode(',', $request->string('products')) as $part) {
+            $part = trim($part);
+
+            if (! str_contains($part, ':')) {
+                continue;
+            }
+
+            [$slug, $quantity] = explode(':', $part, 2);
+            $slug = trim($slug);
+
+            if ($slug !== '') {
+                $quantities[$slug] = max(1, (int) $quantity);
+            }
+        }
+
+        return $quantities;
+    }
+
+    private function loadQuoteProducts(array $slugs, array $quantities = []): array
     {
         if (empty($slugs)) {
             return [];
@@ -75,10 +106,15 @@ class ContactController extends Controller
         return Product::query()
             ->whereIn('slug', $slugs)
             ->where('is_active', true)
-            ->get(['slug', 'name'])
+            ->get(['slug', 'name', 'price'])
             ->sortBy(fn ($product) => array_search($product->slug, $slugs, true))
             ->values()
-            ->map(fn ($product) => ['slug' => $product->slug, 'name' => $product->name])
+            ->map(fn ($product) => [
+                'slug' => $product->slug,
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $quantities[$product->slug] ?? 1,
+            ])
             ->all();
     }
 }

@@ -15,7 +15,7 @@ class ProductController extends Controller
         $filters = $request->only(['category_id', 'badge', 'search', 'sort']);
 
         $query = Product::query()
-            ->where('is_active', true)
+            ->catalog()
             ->with('category');
 
         if ($request->filled('category_id')) {
@@ -42,12 +42,14 @@ class ProductController extends Controller
                 ->orderBy('name'),
             'nouveau' => $query->orderByRaw("CASE badge WHEN 'nouveau' THEN 1 WHEN 'populaire' THEN 2 WHEN 'promo' THEN 3 ELSE 4 END")
                 ->orderByDesc('created_at'),
+            'price_asc' => $query->orderByRaw('CASE WHEN price IS NULL THEN 1 ELSE 0 END')->orderBy('price')->orderBy('name'),
+            'price_desc' => $query->orderByRaw('CASE WHEN price IS NULL THEN 1 ELSE 0 END')->orderByDesc('price')->orderBy('name'),
             default => $query->latest(),
         };
 
         return Inertia::render('Products/Index', [
             'products' => $query->paginate(12)->withQueryString(),
-            'categories' => Category::query()->where('is_active', true)->get(),
+            'categories' => Category::query()->catalog()->orderBy('name')->get(),
             'filters' => $filters,
         ]);
     }
@@ -56,14 +58,14 @@ class ProductController extends Controller
     {
         $product = Product::query()
             ->where('slug', $slug)
-            ->where('is_active', true)
+            ->catalog()
             ->with('category')
             ->firstOrFail();
 
         $relatedProducts = Product::query()
+            ->catalog()
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->where('is_active', true)
             ->with('category')
             ->limit(4)
             ->get();
@@ -72,5 +74,24 @@ class ProductController extends Controller
             'product' => $product,
             'relatedProducts' => $relatedProducts,
         ]);
+    }
+
+    public function suggest(Request $request)
+    {
+        $query = trim($request->string('q'));
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $products = Product::query()
+            ->catalog()
+            ->with('category:id,name,slug')
+            ->search($query, ['name', 'short_description', 'description'])
+            ->orderBy('name')
+            ->limit(8)
+            ->get(['id', 'name', 'slug', 'image_url', 'price', 'category_id']);
+
+        return response()->json($products);
     }
 }

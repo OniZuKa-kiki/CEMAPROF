@@ -16,6 +16,7 @@ class Product extends Model
         'slug',
         'short_description',
         'description',
+        'price',
         'image_url',
         'images',
         'badge',
@@ -25,6 +26,7 @@ class Product extends Model
 
     protected $casts = [
         'images' => 'array',
+        'price' => 'decimal:2',
         'is_featured' => 'boolean',
         'is_active' => 'boolean',
     ];
@@ -45,5 +47,12 @@ class Product extends Model
         }
 
         return $images;
+    }
+
+    public function scopeCatalog($query)
+    {
+        return $query
+            ->where('is_active', true)
+            ->whereHas('category', fn ($q) => $q->catalog());
     }
 }

@@ -18,4 +18,14 @@ class PageController extends Controller
             ],
         ]);
     }
+
+    public function faq(): Response
+    {
+        return Inertia::render('Legal/Faq');
+    }
+
+    public function cgv(): Response
+    {
+        return Inertia::render('Legal/Cgv');
+    }
 }

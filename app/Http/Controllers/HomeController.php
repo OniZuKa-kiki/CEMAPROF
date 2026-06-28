@@ -13,15 +13,17 @@ class HomeController extends Controller
     {
         return Inertia::render('Home/Index', [
             'featuredProducts' => Product::query()
+                ->catalog()
                 ->where('is_featured', true)
-                ->where('is_active', true)
                 ->with('category')
                 ->latest()
                 ->limit(8)
                 ->get(),
             'categories' => Category::query()
-                ->where('is_active', true)
+                ->catalog()
+                ->whereHas('products', fn ($q) => $q->where('is_active', true))
                 ->withCount(['products' => fn ($q) => $q->where('is_active', true)])
+                ->orderBy('name')
                 ->get(),
             'stats' => [
                 ['label' => 'Produits', 'value' => 500, 'suffix' => '+'],

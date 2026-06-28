@@ -4,7 +4,7 @@ import { FacebookIcon, InstagramIcon, LinkedInIcon } from '@/Components/SocialIc
 import SiteLogo from '@/Components/SiteLogo';
 
 export default function Footer() {
-    const { siteSettings, navCategories } = usePage().props;
+    const { siteSettings, navCategories, company } = usePage().props;
 
     const currentYear = new Date().getFullYear();
 
@@ -18,7 +18,7 @@ export default function Footer() {
                     >
                         <SiteLogo size="lg" className="mb-5" />
                         <p className="max-w-xs text-sm leading-relaxed text-gray-400">
-                            Matériel pro pour les métiers exigeants — cuisine, hôtellerie, BTP, nettoyage. Basés à Casablanca, livraison partout au Maroc.
+                            {siteSettings?.company_description || company?.description || 'Importateur distributeur d\'outillage et matériel industriel et agricole à Casablanca.'}
                         </p>
                         <div className="mt-6 flex gap-3">
                             {siteSettings?.facebook && (
@@ -49,6 +49,8 @@ export default function Footer() {
                             <li><Link href="/produits" className="transition-colors hover:text-white">Produits</Link></li>
                             <li><Link href="/a-propos" className="transition-colors hover:text-white">À propos</Link></li>
                             <li><Link href="/contact" className="transition-colors hover:text-white">Contact</Link></li>
+                            <li><Link href="/faq" className="transition-colors hover:text-white">FAQ</Link></li>
+                            <li><Link href="/cgv" className="transition-colors hover:text-white">CGV</Link></li>
                         </ul>
                     </div>
 
@@ -105,6 +107,11 @@ export default function Footer() {
                     style={{ '--reveal-delay': '260ms' }}
                 >
                     <p>&copy; {currentYear} CEMAPROF — Tous droits réservés.</p>
+                    <p className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+                        <Link href="/cgv" className="hover:text-gray-300">CGV</Link>
+                        <Link href="/faq" className="hover:text-gray-300">FAQ</Link>
+                        <Link href="/contact" className="hover:text-gray-300">Contact</Link>
+                    </p>
                 </div>
             </div>
         </footer>

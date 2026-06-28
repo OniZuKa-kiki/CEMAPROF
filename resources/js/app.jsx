@@ -10,7 +10,7 @@ import { Toaster } from "@/Components/ui/toaster";
 
 initLayoutShiftFix();
 
-const appName = "CEMAPROF — La Centrale du Matériel Professionnel";
+const appName = "CEMAPROF — Importateur · Distributeur";
 
 let reactRoot = null;
 

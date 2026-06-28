@@ -38,9 +38,10 @@ class HandleInertiaRequests extends Middleware
             ],
             'siteSettings' => rescue(fn () => SiteSetting::allCached(), [], false),
             'whatsappNumber' => rescue(fn () => SiteSetting::get('whatsapp') ?? config('cemaprof.whatsapp'), config('cemaprof.whatsapp'), false),
+            'company' => config('cemaprof.company'),
             'navCategories' => rescue(
                 fn () => Category::query()
-                    ->where('is_active', true)
+                    ->catalog()
                     ->orderBy('name')
                     ->limit(6)
                     ->get(['id', 'name', 'slug']),

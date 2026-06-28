@@ -3,28 +3,28 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 const testimonials = [
     {
-        name: 'Ahmed Benali',
-        role: 'Directeur, Restaurant Le Jardin',
-        initials: 'AB',
-        color: 'bg-primary',
-        rating: 5,
-        text: 'CEMAPROF nous équipe depuis 5 ans. Qualité irréprochable, livraison rapide et un SAV réactif. Je recommande vivement pour tout matériel professionnel.',
-    },
-    {
-        name: 'Fatima El Amrani',
-        role: 'Gérante, Hôtel Atlas Palace',
-        initials: 'FA',
-        color: 'bg-accent',
-        rating: 5,
-        text: 'Un partenaire de confiance pour notre hôtel. Large gamme de produits, prix compétitifs et conseils personnalisés. L\'équipe est toujours disponible.',
-    },
-    {
         name: 'Karim Tazi',
         role: 'Artisan BTP, Tazi Construction',
         initials: 'KT',
         color: 'bg-emerald-600',
         rating: 5,
-        text: 'Pour l\'outillage professionnel, CEMAPROF est notre référence au Maroc. Des marques reconnues, un stock permanent et des délais respectés.',
+        text: 'Pour l\'outillage et la quincaillerie, CEMAPROF est notre référence à Casablanca. Stock permanent, bons conseils et délais respectés.',
+    },
+    {
+        name: 'Fatima El Amrani',
+        role: 'Responsable achats, exploitation agricole',
+        initials: 'FA',
+        color: 'bg-accent',
+        rating: 5,
+        text: 'Pompes, tuyauterie et matériel agricole — un service réactif qui comprend nos besoins terrain. Je recommande.',
+    },
+    {
+        name: 'Ahmed Benali',
+        role: 'Chef d\'atelier maintenance industrielle',
+        initials: 'AB',
+        color: 'bg-primary',
+        rating: 5,
+        text: 'Large choix en EPI et consommables industriels. CEMAPROF nous fournit régulièrement avec des tarifs compétitifs.',
     },
 ];
 
@@ -59,7 +59,7 @@ export default function TestimonialsSection() {
                         Ils nous font confiance au quotidien
                     </h2>
                     <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-                        Restaurateurs, hôteliers, artisans — des retours concrets, pas des slogans.
+                        Industrie, agriculture, BTP et artisans — des retours concrets de nos clients professionnels.
                     </p>
                 </div>
 

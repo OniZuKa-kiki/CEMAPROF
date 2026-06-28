@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { MessageCircle } from 'lucide-react';
+import WhatsAppIcon from '@/Components/WhatsAppIcon';
 import { formatWhatsAppUrl } from '@/lib/utils';
 
 export default function WhatsAppButton() {
@@ -14,10 +14,10 @@ export default function WhatsAppButton() {
     return (
         <div className="group relative">
             <div
-                className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
+                className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 whitespace-nowrap rounded-lg bg-[#128C7E] px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
                 aria-hidden="true"
             >
-                Chattez avec nous
+                WhatsApp — Discutez avec nous
             </div>
             <button
                 type="button"
@@ -26,7 +26,7 @@ export default function WhatsAppButton() {
                 className="whatsapp-fab relative"
             >
                 <span className="ping-ring" aria-hidden="true" />
-                <MessageCircle className="relative z-10 h-7 w-7 fill-white text-white" />
+                <WhatsAppIcon className="relative z-10 h-7 w-7 text-white" />
             </button>
         </div>
     );

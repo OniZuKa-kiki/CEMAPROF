@@ -20,6 +20,7 @@ export default function ProductForm({ product, categories }) {
         category_id: product?.category_id ? String(product.category_id) : '',
         short_description: product?.short_description || '',
         description: product?.description || '',
+        price: product?.price != null ? String(product.price) : '',
         badge: product?.badge || '',
         is_featured: product?.is_featured ?? false,
         is_active: product?.is_active ?? true,
@@ -99,9 +100,23 @@ export default function ProductForm({ product, categories }) {
                                     </Select>
                                     {errors.category_id && <p className="text-sm text-accent">{errors.category_id}</p>}
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Description courte</Label>
-                                    <Input value={data.short_description} onChange={(e) => setData('short_description', e.target.value)} />
+                                <div className="grid gap-5 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label>Description courte</Label>
+                                        <Input value={data.short_description} onChange={(e) => setData('short_description', e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Prix indicatif (MAD)</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="Ex. 12500"
+                                            value={data.price}
+                                            onChange={(e) => setData('price', e.target.value)}
+                                        />
+                                        {errors.price && <p className="text-sm text-accent">{errors.price}</p>}
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Description complète</Label>

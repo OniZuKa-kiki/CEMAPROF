@@ -9,8 +9,15 @@ function isPageNumber(label) {
     return /^\d+$/.test(text);
 }
 
-export function Pagination({ links, className }) {
+export function Pagination({ links, className, onNavigate, visitOptions }) {
     if (!links || links.length <= 3) return null;
+
+    const handleNavigate = (url) => {
+        if (!url || !onNavigate) {
+            return;
+        }
+        onNavigate(url, visitOptions);
+    };
 
     return (
         <nav className={cn('flex items-center justify-center gap-1', className)} aria-label="Pagination">
@@ -25,16 +32,17 @@ export function Pagination({ links, className }) {
                             variant="outline"
                             size="icon"
                             disabled={!link.url}
-                            asChild={!!link.url}
                             className="rounded-full"
                             aria-label="Page précédente"
+                            onClick={link.url && onNavigate ? () => handleNavigate(link.url) : undefined}
+                            asChild={!!link.url && !onNavigate}
                         >
-                            {link.url ? (
-                                <Link href={link.url} preserveState preserveScroll>
+                            {link.url && !onNavigate ? (
+                                <Link href={link.url} preserveState>
                                     <ChevronLeft className="h-4 w-4" />
                                 </Link>
                             ) : (
-                                <span><ChevronLeft className="h-4 w-4" /></span>
+                                <ChevronLeft className="h-4 w-4" />
                             )}
                         </Button>
                     );
@@ -47,16 +55,17 @@ export function Pagination({ links, className }) {
                             variant="outline"
                             size="icon"
                             disabled={!link.url}
-                            asChild={!!link.url}
                             className="rounded-full"
                             aria-label="Page suivante"
+                            onClick={link.url && onNavigate ? () => handleNavigate(link.url) : undefined}
+                            asChild={!!link.url && !onNavigate}
                         >
-                            {link.url ? (
-                                <Link href={link.url} preserveState preserveScroll>
+                            {link.url && !onNavigate ? (
+                                <Link href={link.url} preserveState>
                                     <ChevronRight className="h-4 w-4" />
                                 </Link>
                             ) : (
-                                <span><ChevronRight className="h-4 w-4" /></span>
+                                <ChevronRight className="h-4 w-4" />
                             )}
                         </Button>
                     );
@@ -66,21 +75,24 @@ export function Pagination({ links, className }) {
                     return null;
                 }
 
+                const label = link.label.replace(/<[^>]*>/g, '');
+
                 return (
                     <Button
                         key={index}
                         variant={link.active ? 'default' : 'ghost'}
                         size="sm"
                         disabled={!link.url}
-                        asChild={!!link.url}
                         className={cn('min-w-[40px] rounded-full', link.active && 'pointer-events-none')}
+                        onClick={link.url && onNavigate ? () => handleNavigate(link.url) : undefined}
+                        asChild={!!link.url && !onNavigate}
                     >
-                        {link.url ? (
-                            <Link href={link.url} preserveState preserveScroll>
-                                {link.label.replace(/<[^>]*>/g, '')}
+                        {link.url && !onNavigate ? (
+                            <Link href={link.url} preserveState>
+                                {label}
                             </Link>
                         ) : (
-                            <span>{link.label.replace(/<[^>]*>/g, '')}</span>
+                            <span>{label}</span>
                         )}
                     </Button>
                 );

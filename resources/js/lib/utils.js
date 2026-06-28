@@ -13,6 +13,31 @@ export function formatWhatsAppUrl(number, message = '') {
         : `https://wa.me/${cleanNumber}`;
 }
 
+export function formatWhatsAppDisplay(number) {
+    const digits = String(number).replace(/\D/g, '');
+
+    if (digits.startsWith('212') && digits.length >= 12) {
+        const local = `0${digits.slice(3)}`;
+        return local.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+    }
+
+    return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+}
+
+export function formatPrice(amount, currency = 'MAD') {
+    const num = Number(amount);
+    if (Number.isNaN(num)) {
+        return null;
+    }
+
+    const formatted = new Intl.NumberFormat('fr-MA', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(num);
+
+    return `${formatted} ${currency}`;
+}
+
 export const badgeStyles = {
     nouveau: 'bg-primary text-white',
     populaire: 'bg-accent text-white',
