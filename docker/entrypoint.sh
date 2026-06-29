@@ -116,12 +116,24 @@ fi
 
 php artisan config:clear --no-interaction 2>/dev/null || true
 
+# Mail diagnostic (no secrets)
+mail_mailer="${MAIL_MAILER:-auto}"
+resend_key_status=$([ -n "${RESEND_API_KEY:-}" ] && echo set || echo missing)
+mail_from="${MAIL_FROM_ADDRESS:-missing}"
+echo "→ Mail check: MAIL_MAILER=${mail_mailer} RESEND_API_KEY=${resend_key_status} MAIL_FROM=${mail_from}"
+
 if [ "${APP_ENV:-production}" = "production" ]; then
     if db_configured; then
         sync_db_env
         php artisan config:cache --no-interaction
         php artisan route:cache --no-interaction
         php artisan view:cache --no-interaction
+        php -r "
+            require 'vendor/autoload.php';
+            \$app = require 'bootstrap/app.php';
+            \$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            echo '→ Mail active mailer: ' . config('mail.default') . PHP_EOL;
+        " 2>/dev/null || true
     else
         echo "⚠ Skipping config:cache — no database env vars (would bake 127.0.0.1 defaults)"
     fi

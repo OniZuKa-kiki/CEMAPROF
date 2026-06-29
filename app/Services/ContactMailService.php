@@ -16,6 +16,37 @@ class ContactMailService
     {
         $message->loadMissing([]);
 
+        $mailer = (string) config('mail.default');
+
+        if ($mailer === 'log') {
+            Log::warning('CEMAPROF contact mail using log driver — configure RESEND_API_KEY on Railway to send real emails', [
+                'message_id' => $message->id,
+            ]);
+        }
+
+        if ($mailer === 'resend' && empty(config('services.resend.key'))) {
+            Log::error('CEMAPROF contact mail misconfigured: MAIL_MAILER=resend but RESEND_API_KEY is missing', [
+                'message_id' => $message->id,
+            ]);
+
+            return;
+        }
+
+        if (in_array($mailer, ['resend_smtp', 'smtp'], true) && empty(config('mail.mailers.'.$mailer.'.password'))) {
+            Log::error('CEMAPROF contact mail misconfigured: SMTP password / RESEND_API_KEY missing', [
+                'message_id' => $message->id,
+                'mailer' => $mailer,
+            ]);
+
+            return;
+        }
+
+        Log::info('CEMAPROF contact mail dispatch started', [
+            'message_id' => $message->id,
+            'mailer' => $mailer,
+            'from' => config('mail.from.address'),
+        ]);
+
         if (MailRecipientService::isFeatureEnabled('admin_on_contact')) {
             self::sendToAdmins(new NewContactMessageMail($message));
         }
@@ -104,6 +135,7 @@ class ContactMailService
                 'mailable' => $mailable::class,
                 'mailer' => config('mail.default'),
                 'error' => $exception->getMessage(),
+                'exception' => $exception::class,
             ]);
         }
     }
