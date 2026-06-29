@@ -270,7 +270,7 @@ function CatalogFilterBar({ categories, brands, priceBounds, filters, filterCoun
 
                     </button>
 
-                    {categories.map((cat) => (
+                    {categories.filter((cat) => cat?.id && cat?.name).map((cat) => (
 
                         <button
 

@@ -99,6 +99,9 @@ if db_configured && sync_db_env; then
 
     echo "→ Migrations complete"
 
+    php artisan cache:clear --no-interaction 2>/dev/null || true
+    echo "→ Application cache cleared"
+
     if [ "${RUN_SEEDER:-false}" = "true" ]; then
         echo "→ Running seeders…"
         php artisan db:seed --force --no-interaction

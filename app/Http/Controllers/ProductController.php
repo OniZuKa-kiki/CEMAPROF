@@ -30,8 +30,15 @@ class ProductController extends Controller
         if ($request->filled('category_id')) {
             $categoryIds = is_array($request->category_id)
                 ? $request->category_id
-                : explode(',', $request->category_id);
-            $query->whereIn('category_id', array_filter($categoryIds));
+                : explode(',', (string) $request->category_id);
+            $categoryIds = array_values(array_filter(
+                $categoryIds,
+                fn ($id) => is_numeric($id) && (int) $id > 0,
+            ));
+
+            if ($categoryIds !== []) {
+                $query->whereIn('category_id', array_map('intval', $categoryIds));
+            }
         }
 
         if ($request->filled('brand')) {

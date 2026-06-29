@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -15,28 +16,60 @@ class CatalogCache
         return Cache::remember("catalog.{$key}", self::TTL_SECONDS, $callback);
     }
 
+    /**
+     * Cache a list of models/scalars as plain arrays (safe for JSON + Inertia).
+     *
+     * @return array<int, mixed>
+     */
     public static function rememberArray(string $key, callable $callback): array
     {
-        $value = self::remember($key, fn () => self::normalizeArray($callback()));
+        $cached = Cache::get("catalog.{$key}");
 
-        return self::normalizeArray($value);
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $value = self::serializeItems($callback());
+
+        Cache::put("catalog.{$key}", $value, self::TTL_SECONDS);
+
+        return $value;
     }
 
-    public static function normalizeArray(mixed $value): array
+    public static function serializeItems(mixed $result): array
     {
-        if ($value instanceof Collection) {
-            return $value->values()->all();
+        if ($result instanceof Collection) {
+            return $result
+                ->map(fn ($item) => self::serializeItem($item))
+                ->values()
+                ->all();
         }
 
-        if ($value instanceof Arrayable) {
-            return collect($value->toArray())->values()->all();
+        if ($result instanceof Model) {
+            return [self::serializeItem($result)];
         }
 
-        if (is_array($value)) {
-            return array_values($value);
+        if (is_array($result)) {
+            return collect($result)
+                ->map(fn ($item) => self::serializeItem($item))
+                ->values()
+                ->all();
         }
 
         return [];
+    }
+
+    public static function serializeItem(mixed $item): mixed
+    {
+        if ($item instanceof Model) {
+            return $item->toArray();
+        }
+
+        if ($item instanceof Arrayable) {
+            return $item->toArray();
+        }
+
+        return $item;
     }
 
     public static function flush(): void

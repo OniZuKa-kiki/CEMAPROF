@@ -61,15 +61,14 @@ class ContactController extends Controller
                 ->with('error', 'Impossible d\'enregistrer votre message pour le moment. Réessayez ou contactez-nous par téléphone.');
         }
 
-        $messageId = $contactMessage->id;
-
-        dispatch(function () use ($messageId): void {
-            $message = ContactMessage::query()->find($messageId);
-
-            if ($message) {
-                ContactMailService::sendForMessage($message);
-            }
-        })->afterResponse();
+        try {
+            ContactMailService::sendForMessage($contactMessage);
+        } catch (\Throwable $exception) {
+            Log::error('Contact mail delivery failed', [
+                'message_id' => $contactMessage->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return redirect()
             ->back()

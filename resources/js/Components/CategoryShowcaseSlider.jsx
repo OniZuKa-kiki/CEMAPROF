@@ -17,8 +17,9 @@ const contentTransition = {
 };
 
 export default function CategoryShowcaseSlider({ categories = [] }) {
+    const validCategories = categories.filter((item) => item?.id && item?.name && item?.slug);
     const [activeIndex, setActiveIndex] = useState(0);
-    const count = categories.length;
+    const count = validCategories.length;
 
     const goTo = useCallback((index) => {
         if (!count) {
@@ -51,7 +52,7 @@ export default function CategoryShowcaseSlider({ categories = [] }) {
         return null;
     }
 
-    const category = categories[activeIndex];
+    const category = validCategories[activeIndex];
 
     return (
         <section className="category-showcase section-py">
@@ -137,7 +138,7 @@ export default function CategoryShowcaseSlider({ categories = [] }) {
                 </div>
 
                 <div className="category-showcase__indicators" role="tablist" aria-label="Catégories">
-                    {categories.map((item, index) => (
+                    {validCategories.map((item, index) => (
                         <button
                             key={item.id}
                             type="button"

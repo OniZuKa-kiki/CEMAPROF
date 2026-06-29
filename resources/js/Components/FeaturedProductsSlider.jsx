@@ -78,7 +78,7 @@ export default function FeaturedProductsSlider({ products = [] }) {
                         className="featured-showcase__carousel"
                     >
                         <CarouselContent className="-ml-4">
-                            {products.map((product) => (
+                            {products.filter((product) => product?.id && product?.slug).map((product) => (
                                 <CarouselItem
                                     key={product.id}
                                     className="basis-full pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"

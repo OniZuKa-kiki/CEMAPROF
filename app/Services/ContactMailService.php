@@ -93,10 +93,16 @@ class ContactMailService
     {
         try {
             Mail::to($recipient)->send($mailable);
-        } catch (\Throwable $exception) {
-            Log::warning('CEMAPROF mail delivery failed', [
+            Log::info('CEMAPROF mail sent', [
                 'recipient' => $recipient,
                 'mailable' => $mailable::class,
+                'mailer' => config('mail.default'),
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('CEMAPROF mail delivery failed', [
+                'recipient' => $recipient,
+                'mailable' => $mailable::class,
+                'mailer' => config('mail.default'),
                 'error' => $exception->getMessage(),
             ]);
         }
