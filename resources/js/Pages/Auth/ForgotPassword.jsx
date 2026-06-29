@@ -17,12 +17,11 @@ export default function ForgotPassword({ status }) {
 
     return (
         <GuestLayout>
-            <Head title="Forgot Password" />
+            <Head title="Mot de passe oublié" />
 
             <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
+                Mot de passe oublié ? Indiquez votre adresse e-mail et nous vous enverrons un lien
+                pour choisir un nouveau mot de passe.
             </div>
 
             {status && (
@@ -40,13 +39,14 @@ export default function ForgotPassword({ status }) {
                     className="mt-1 block w-full"
                     isFocused={true}
                     onChange={(e) => setData('email', e.target.value)}
+                    placeholder="admin@cemaprof.ma"
                 />
 
                 <InputError message={errors.email} className="mt-2" />
 
                 <div className="mt-4 flex items-center justify-end">
                     <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
+                        Envoyer le lien
                     </PrimaryButton>
                 </div>
             </form>
