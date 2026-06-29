@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ContactRequest;
 use App\Models\ContactMessage;
 use App\Models\Product;
+use App\Services\ContactMailService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -45,9 +48,28 @@ class ContactController extends Controller
         $validated['product_slugs'] = ! empty($productSlugs) ? $productSlugs : null;
         $validated['product_slug'] = $productSlugs[0] ?? ($validated['product_slug'] ?? null);
 
-        $contactMessage = ContactMessage::create($validated);
+        try {
+            $contactMessage = ContactMessage::create($validated);
+        } catch (QueryException $exception) {
+            Log::error('Contact message save failed', [
+                'error' => $exception->getMessage(),
+            ]);
 
-        \App\Services\ContactMailService::sendForMessage($contactMessage);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Impossible d\'enregistrer votre message pour le moment. Réessayez ou contactez-nous par téléphone.');
+        }
+
+        $messageId = $contactMessage->id;
+
+        dispatch(function () use ($messageId): void {
+            $message = ContactMessage::query()->find($messageId);
+
+            if ($message) {
+                ContactMailService::sendForMessage($message);
+            }
+        })->afterResponse();
 
         return redirect()
             ->back()

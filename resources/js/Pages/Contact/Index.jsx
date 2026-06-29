@@ -57,8 +57,19 @@ function ContactFormSection({ icon: Icon, title, children }) {
 
 function ContactForm({ quoteProducts = [], prefilledSubject }) {
     const { toast } = useToast();
+    const { flash } = usePage().props;
     const { items, setItemsFromList, removeItem, clearCart } = useQuoteCart();
     const messageInitialized = useRef(false);
+
+    useEffect(() => {
+        if (flash?.error) {
+            toast({
+                title: 'Envoi impossible',
+                description: flash.error,
+                variant: 'destructive',
+            });
+        }
+    }, [flash?.error, toast]);
 
     useEffect(() => {
         if (quoteProducts.length) {
@@ -108,6 +119,16 @@ function ContactForm({ quoteProducts = [], prefilledSubject }) {
                     title: 'Message envoyé !',
                     description: 'Nous vous répondrons sous 24h.',
                     variant: 'success',
+                });
+            },
+            onError: (formErrors) => {
+                const firstError = Object.values(formErrors)[0];
+                toast({
+                    title: 'Envoi impossible',
+                    description: typeof firstError === 'string'
+                        ? firstError
+                        : 'Vérifiez les champs du formulaire et réessayez.',
+                    variant: 'destructive',
                 });
             },
         });

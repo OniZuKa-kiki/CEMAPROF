@@ -27,11 +27,11 @@ class SecurityHeaders
                 'Content-Security-Policy',
                 "default-src 'self'; ".
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval'; ".
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ".
-                "font-src 'self' https://fonts.gstatic.com data:; ".
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net; ".
+                "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:; ".
                 "img-src 'self' data: https: blob:; ".
-                "connect-src 'self' ws: wss:; ".
-                "frame-src 'self' https://www.google.com https://maps.google.com; ".
+                "connect-src 'self' ws: wss: https:; ".
+                "frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com; ".
                 "object-src 'none'; ".
                 "base-uri 'self'; ".
                 "form-action 'self'; ".
