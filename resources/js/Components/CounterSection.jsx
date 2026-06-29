@@ -44,15 +44,23 @@ function AnimatedCounter({ value, suffix = '', duration = 2000 }) {
 
 export default function CounterSection({ stats, className = '' }) {
     return (
-        <section className={`bg-primary py-16 text-white reveal-on-scroll ${className}`}>
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className={`stats-section reveal-on-scroll ${className}`}>
+            <div
+                className="stats-section__bg"
+                style={{
+                    backgroundImage: "url('/images/stats-bg.jpg'), url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1600&q=80')",
+                }}
+                aria-hidden="true"
+            />
+            <div className="stats-section__overlay" aria-hidden="true" />
+            <div className="stats-section__content mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
                     {stats.map((stat, index) => (
-                        <div key={index} className="stat-block">
-                            <p className="text-4xl font-bold sm:text-5xl">
+                        <div key={index} className="stat-block text-center">
+                            <p className="text-4xl font-bold text-white sm:text-5xl">
                                 <AnimatedCounter value={stat.value} suffix={stat.suffix || ''} />
                             </p>
-                            <p className="mt-2 text-sm text-white/80 sm:text-base">{stat.label}</p>
+                            <p className="mt-2 text-sm text-white/85 sm:text-base">{stat.label}</p>
                         </div>
                     ))}
                 </div>

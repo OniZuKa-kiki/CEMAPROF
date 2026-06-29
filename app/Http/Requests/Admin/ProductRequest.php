@@ -23,6 +23,8 @@ class ProductRequest extends FormRequest
             'short_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'price' => ['nullable', 'numeric', 'min:0'],
+            'brand' => ['nullable', 'string', 'max:80'],
+            'availability' => ['nullable', Rule::in(['in_stock', 'out_of_stock', 'on_sale'])],
             'badge' => ['nullable', Rule::in(['nouveau', 'populaire', 'promo'])],
             'is_featured' => ['boolean'],
             'is_active' => ['boolean'],

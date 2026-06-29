@@ -10,7 +10,9 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/produits', [ProductController::class, 'index'])->name('products');
-Route::get('/api/products/suggest', [ProductController::class, 'suggest'])->name('products.suggest');
+Route::get('/api/products/suggest', [ProductController::class, 'suggest'])
+    ->middleware('throttle:search-suggest')
+    ->name('products.suggest');
 Route::get('/produits/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
@@ -22,34 +24,38 @@ Route::post('/contact', [ContactController::class, 'store'])
     ->name('contact.store');
 
 Route::get('/sitemap.xml', function () {
-    $urls = [
-        ['loc' => url('/'), 'priority' => '1.0'],
-        ['loc' => url('/produits'), 'priority' => '0.9'],
-        ['loc' => url('/a-propos'), 'priority' => '0.7'],
-        ['loc' => url('/faq'), 'priority' => '0.6'],
-        ['loc' => url('/cgv'), 'priority' => '0.5'],
-        ['loc' => url('/contact'), 'priority' => '0.8'],
-    ];
+    $xml = \App\Services\CatalogCache::remember('sitemap', function () {
+        $urls = [
+            ['loc' => url('/'), 'priority' => '1.0'],
+            ['loc' => url('/produits'), 'priority' => '0.9'],
+            ['loc' => url('/a-propos'), 'priority' => '0.7'],
+            ['loc' => url('/faq'), 'priority' => '0.6'],
+            ['loc' => url('/cgv'), 'priority' => '0.5'],
+            ['loc' => url('/contact'), 'priority' => '0.8'],
+        ];
 
-    foreach (\App\Models\Category::where('is_active', true)->get() as $category) {
-        $urls[] = ['loc' => url("/categories/{$category->slug}"), 'priority' => '0.8'];
-    }
+        foreach (\App\Models\Category::where('is_active', true)->get() as $category) {
+            $urls[] = ['loc' => url("/categories/{$category->slug}"), 'priority' => '0.8'];
+        }
 
-    foreach (\App\Models\Product::where('is_active', true)->get() as $product) {
-        $urls[] = ['loc' => url("/produits/{$product->slug}"), 'priority' => '0.7'];
-    }
+        foreach (\App\Models\Product::where('is_active', true)->get() as $product) {
+            $urls[] = ['loc' => url("/produits/{$product->slug}"), 'priority' => '0.7'];
+        }
 
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $content = '<?xml version="1.0" encoding="UTF-8"?>';
+        $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-    foreach ($urls as $url) {
-        $xml .= '<url>';
-        $xml .= '<loc>'.htmlspecialchars($url['loc']).'</loc>';
-        $xml .= '<priority>'.$url['priority'].'</priority>';
-        $xml .= '</url>';
-    }
+        foreach ($urls as $url) {
+            $content .= '<url>';
+            $content .= '<loc>'.htmlspecialchars($url['loc']).'</loc>';
+            $content .= '<priority>'.$url['priority'].'</priority>';
+            $content .= '</url>';
+        }
 
-    $xml .= '</urlset>';
+        $content .= '</urlset>';
+
+        return $content;
+    });
 
     return response($xml, 200)->header('Content-Type', 'application/xml');
 })->name('sitemap');

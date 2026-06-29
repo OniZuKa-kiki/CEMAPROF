@@ -16,6 +16,7 @@ export const categoryVisualHints = {
     },
     'tuyauterie-raccords': {
         file: 'Tuyauterie_Raccords.png',
+        modifier: 'category-showcase__visual-wrap--large',
         hint: 'PNG : ensemble de raccords, vannes et tuyaux en laiton/inox, composition produit',
     },
     'pompes-motopompes': {
@@ -40,10 +41,6 @@ export function getCategoryVisual(category) {
     }
 
     return category?.image_url || categoryImage('pompe_centrifuge.png');
-}
-
-export function getCategoryVisualHint(category) {
-    return categoryVisualHints[category?.slug]?.hint || 'PNG produit isolé sur fond transparent';
 }
 
 export function getCategoryVisualModifier(category) {

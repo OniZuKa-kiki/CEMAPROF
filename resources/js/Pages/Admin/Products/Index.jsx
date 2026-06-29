@@ -10,7 +10,7 @@ import { Badge } from '@/Components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import { Pagination } from '@/Components/ui/pagination';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/Components/ui/dialog';
-import { badgeLabels } from '@/lib/utils';
+import { availabilityLabels, badgeLabels } from '@/lib/utils';
 
 export default function ProductsIndex({ products, categories, filters }) {
     const [deleteId, setDeleteId] = useState(null);
@@ -109,6 +109,8 @@ export default function ProductsIndex({ products, categories, filters }) {
                         <TableRow>
                             <TableHead>Produit</TableHead>
                             <TableHead>Catégorie</TableHead>
+                            <TableHead>Marque</TableHead>
+                            <TableHead>Disponibilité</TableHead>
                             <TableHead>Badge</TableHead>
                             <TableHead>Actif</TableHead>
                             <TableHead>Vedette</TableHead>
@@ -135,6 +137,22 @@ export default function ProductsIndex({ products, categories, filters }) {
                                     </div>
                                 </TableCell>
                                 <TableCell>{product.category?.name}</TableCell>
+                                <TableCell>{product.brand || '—'}</TableCell>
+                                <TableCell>
+                                    {product.availability ? (
+                                        <Badge
+                                            variant={
+                                                product.availability === 'on_sale'
+                                                    ? 'promo'
+                                                    : product.availability === 'out_of_stock'
+                                                        ? 'accent'
+                                                        : 'default'
+                                            }
+                                        >
+                                            {availabilityLabels[product.availability] ?? product.availability}
+                                        </Badge>
+                                    ) : '—'}
+                                </TableCell>
                                 <TableCell>{product.badge ? <Badge variant={product.badge === 'populaire' ? 'accent' : 'default'}>{badgeLabels[product.badge]}</Badge> : '—'}</TableCell>
                                 <TableCell><Switch checked={product.is_active} onCheckedChange={() => toggle(product.id, 'active')} /></TableCell>
                                 <TableCell><Switch checked={product.is_featured} onCheckedChange={() => toggle(product.id, 'featured')} /></TableCell>

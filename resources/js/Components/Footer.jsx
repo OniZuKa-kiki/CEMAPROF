@@ -60,7 +60,7 @@ export default function Footer() {
                     >
                         <h3 className="footer-heading">Catégories</h3>
                         <ul className="space-y-3 text-sm text-gray-400">
-                            {navCategories?.map((cat) => (
+                            {(Array.isArray(navCategories) ? navCategories : []).map((cat) => (
                                 <li key={cat.id}>
                                     <Link href={`/categories/${cat.slug}`} className="transition-colors hover:text-white">
                                         {cat.name}

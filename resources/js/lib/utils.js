@@ -50,6 +50,12 @@ export const badgeLabels = {
     promo: 'Promo',
 };
 
+export const availabilityLabels = {
+    in_stock: 'En stock',
+    out_of_stock: 'Rupture de stock',
+    on_sale: 'En promotion',
+};
+
 export const subjectOptions = [
     { value: 'devis', label: 'Demande de devis' },
     { value: 'info-produit', label: 'Information produit' },

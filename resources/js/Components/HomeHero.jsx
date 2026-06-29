@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Shield, Wrench, ArrowRight, Factory, Droplets, Truck } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 
@@ -18,34 +18,26 @@ const ease = [0.32, 0.72, 0, 1];
 
 export default function HomeHero() {
     const { company } = usePage().props;
-    const reduceMotion = useReducedMotion();
     const [heroSrc, setHeroSrc] = useState(HERO_IMAGE);
 
     const textContainer = {
         hidden: {},
         show: {
-            transition: reduceMotion
-                ? { duration: 0 }
-                : { staggerChildren: 0.11, delayChildren: 0.08 },
+            transition: { staggerChildren: 0.11, delayChildren: 0.08 },
         },
     };
 
-    const textItem = reduceMotion
-        ? { hidden: { opacity: 1, y: 0, filter: 'blur(0px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)' } }
-        : {
-            hidden: { opacity: 0, y: 32, filter: 'blur(10px)' },
-            show: {
-                opacity: 1,
-                y: 0,
-                filter: 'blur(0px)',
-                transition: { duration: 0.75, ease },
-            },
-        };
+    const textItem = {
+        hidden: { opacity: 0, y: 32, filter: 'blur(10px)' },
+        show: {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            transition: { duration: 0.75, ease },
+        },
+    };
 
-    const visualInitial = reduceMotion
-        ? { opacity: 1, x: 0, scale: 1 }
-        : { opacity: 0, x: 72, scale: 0.94 };
-
+    const visualInitial = { opacity: 0, x: 72, scale: 0.94 };
     const visualAnimate = { opacity: 1, x: 0, scale: 1 };
 
     return (
@@ -119,7 +111,7 @@ export default function HomeHero() {
                     className="hero-visual__wrap"
                     initial={visualInitial}
                     animate={visualAnimate}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.95, delay: 0.28, ease }}
+                    transition={{ duration: 0.95, delay: 0.28, ease }}
                 >
                     <div className="hero-visual__frame">
                         <img
@@ -135,9 +127,9 @@ export default function HomeHero() {
 
                     <motion.div
                         className="hero-visual__badge"
-                        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                        initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: reduceMotion ? 0 : 0.85, ease }}
+                        transition={{ duration: 0.55, delay: 0.85, ease }}
                     >
                         <Shield className="h-3.5 w-3.5" />
                         Stock permanent
@@ -145,9 +137,9 @@ export default function HomeHero() {
 
                     <motion.div
                         className="hero-visual__badge hero-visual__badge--red"
-                        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                        initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: reduceMotion ? 0 : 1, ease }}
+                        transition={{ duration: 0.55, delay: 1, ease }}
                     >
                         <Droplets className="h-3.5 w-3.5" />
                         Pompes & tuyauterie
@@ -156,9 +148,9 @@ export default function HomeHero() {
 
                 <motion.div
                     className="hero-visual__stat"
-                    initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.92 }}
+                    initial={{ opacity: 0, y: 24, scale: 0.92 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.6, delay: reduceMotion ? 0 : 1.05, ease }}
+                    transition={{ duration: 0.6, delay: 1.05, ease }}
                 >
                     <p className="hero-visual__stat-number">+2 000</p>
                     <p className="hero-visual__stat-label">références disponibles</p>

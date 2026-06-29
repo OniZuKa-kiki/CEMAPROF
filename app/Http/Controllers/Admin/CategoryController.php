@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CategoryRequest;
 use App\Models\Category;
+use App\Services\AuditLogger;
 use App\Services\ImageUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
@@ -42,7 +43,12 @@ class CategoryController extends Controller
             $data['image_url'] = ImageUploadService::store($request->file('image'), 'categories');
         }
 
-        Category::create($data);
+        $category = Category::create($data);
+
+        AuditLogger::log('category.created', 'category', $category->id, [
+            'name' => $category->name,
+            'slug' => $category->slug,
+        ]);
 
         return redirect()->route('admin.categories.index')->with('success', 'Catégorie créée avec succès.');
     }
@@ -70,6 +76,11 @@ class CategoryController extends Controller
 
         $category->update($data);
 
+        AuditLogger::log('category.updated', 'category', $category->id, [
+            'name' => $category->name,
+            'slug' => $category->slug,
+        ]);
+
         return redirect()->route('admin.categories.index')->with('success', 'Catégorie mise à jour.');
     }
 
@@ -78,6 +89,11 @@ class CategoryController extends Controller
         if ($category->products()->exists()) {
             return back()->with('error', 'Impossible de supprimer : des produits sont liés à cette catégorie.');
         }
+
+        AuditLogger::log('category.deleted', 'category', $category->id, [
+            'name' => $category->name,
+            'slug' => $category->slug,
+        ]);
 
         ImageUploadService::deleteIfLocal($category->image_url);
         $category->delete();

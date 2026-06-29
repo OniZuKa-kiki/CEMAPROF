@@ -15,7 +15,7 @@ const badgeVariantMap = {
     promo: 'promo',
 };
 
-export default function ProductCard({ product, className }) {
+export default function ProductCard({ product, className, compact = false }) {
     const { toast } = useToast();
     const { items, addItem } = useQuoteCart();
     const cartItem = items.find((item) => item.slug === product.slug);
@@ -47,8 +47,8 @@ export default function ProductCard({ product, className }) {
     };
 
     return (
-        <article className={cn('product-card product-card--v2 group reveal-on-scroll', className)}>
-            <Link href={`/produits/${product.slug}`} className="product-image-wrap relative block">
+        <article className={cn('product-card product-card--v2 group reveal-on-scroll', compact && 'product-card--compact', className)}>
+            <Link href={`/produits/${product.slug}`} className="product-image-wrap product-card__media relative block">
                 <img
                     src={product.image_url || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80'}
                     alt={product.name}
@@ -61,7 +61,7 @@ export default function ProductCard({ product, className }) {
                     </Badge>
                 )}
             </Link>
-            <div className="flex flex-1 flex-col p-4 sm:p-5">
+            <div className="product-card__body flex flex-1 flex-col p-4 sm:p-5">
                 {product.category && (
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                         {product.category.name}
@@ -72,9 +72,11 @@ export default function ProductCard({ product, className }) {
                         {product.name}
                     </h3>
                 </Link>
-                <p className="mt-2 line-clamp-2 flex-1 text-sm text-muted-foreground">
-                    {product.short_description}
-                </p>
+                {product.short_description && (
+                    <p className="product-card__desc mt-2 line-clamp-2 flex-1 text-sm text-muted-foreground">
+                        {product.short_description}
+                    </p>
+                )}
                 {displayPrice ? (
                     <p className="mt-3 text-lg font-bold text-primary">{displayPrice}</p>
                 ) : (

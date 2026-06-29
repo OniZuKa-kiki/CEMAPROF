@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\CatalogCache;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -12,7 +13,15 @@ class ProductController extends Controller
 {
     public function index(Request $request): Response
     {
-        $filters = $request->only(['category_id', 'badge', 'search', 'sort']);
+        $filters = $request->only([
+            'category_id',
+            'search',
+            'sort',
+            'brand',
+            'availability',
+            'price_min',
+            'price_max',
+        ]);
 
         $query = Product::query()
             ->catalog()
@@ -25,12 +34,24 @@ class ProductController extends Controller
             $query->whereIn('category_id', array_filter($categoryIds));
         }
 
-        if ($request->filled('badge')) {
-            $query->where('badge', $request->badge);
+        if ($request->filled('brand')) {
+            $query->where('brand', $request->brand);
+        }
+
+        if ($request->filled('availability')) {
+            $query->where('availability', $request->availability);
         }
 
         if ($request->filled('search')) {
             $query->search($request->search, ['name', 'short_description', 'description']);
+        }
+
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->price_max);
         }
 
         match ($request->input('sort', 'recent')) {
@@ -47,11 +68,60 @@ class ProductController extends Controller
             default => $query->latest(),
         };
 
+        $priceBounds = CatalogCache::remember('price_bounds', function () {
+            $bounds = Product::query()
+                ->catalog()
+                ->whereNotNull('price')
+                ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+                ->first();
+
+            return [
+                'min' => (float) ($bounds->min_price ?? 0),
+                'max' => (float) ($bounds->max_price ?? 5000),
+            ];
+        });
+
         return Inertia::render('Products/Index', [
             'products' => $query->paginate(12)->withQueryString(),
-            'categories' => Category::query()->catalog()->orderBy('name')->get(),
+            'categories' => CatalogCache::rememberArray('categories', fn () => Category::query()->catalog()->orderBy('name')->get()),
+            'brands' => CatalogCache::rememberArray('brands', fn () => Product::query()
+                ->catalog()
+                ->whereNotNull('brand')
+                ->distinct()
+                ->orderBy('brand')
+                ->pluck('brand')),
+            'priceBounds' => $priceBounds,
+            'filterCounts' => CatalogCache::remember('filter_counts', fn () => $this->catalogFilterCounts()),
             'filters' => $filters,
         ]);
+    }
+
+    private function catalogFilterCounts(): array
+    {
+        $base = Product::query()->catalog();
+
+        return [
+            'total' => (clone $base)->count(),
+            'categories' => (clone $base)
+                ->selectRaw('category_id, COUNT(*) as aggregate')
+                ->groupBy('category_id')
+                ->pluck('aggregate', 'category_id')
+                ->map(fn ($count) => (int) $count)
+                ->all(),
+            'brands' => (clone $base)
+                ->whereNotNull('brand')
+                ->selectRaw('brand, COUNT(*) as aggregate')
+                ->groupBy('brand')
+                ->pluck('aggregate', 'brand')
+                ->map(fn ($count) => (int) $count)
+                ->all(),
+            'availability' => (clone $base)
+                ->selectRaw('availability, COUNT(*) as aggregate')
+                ->groupBy('availability')
+                ->pluck('aggregate', 'availability')
+                ->map(fn ($count) => (int) $count)
+                ->all(),
+        ];
     }
 
     public function show(string $slug): Response
@@ -73,6 +143,7 @@ class ProductController extends Controller
         return Inertia::render('Products/Show', [
             'product' => $product,
             'relatedProducts' => $relatedProducts,
+            'canonicalUrl' => url("/produits/{$product->slug}"),
         ]);
     }
 

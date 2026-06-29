@@ -16,8 +16,9 @@ import {
 import MainLayout from '@/Layouts/MainLayout';
 import CounterSection from '@/Components/CounterSection';
 import PageCta from '@/Components/PageCta';
+import CursorParallaxImage from '@/Components/CursorParallaxImage';
+import ActivitiesShowcase from '@/Components/ActivitiesShowcase';
 import { PageHero, SectionTitle } from '@/Components/PageHero';
-import { Card, CardContent } from '@/Components/ui/card';
 
 const activityIcons = [Wrench, Droplets, Factory, Shield, Package];
 
@@ -29,11 +30,21 @@ const values = [
 ];
 
 const sectors = [
-    { icon: Factory, title: 'Industrie & ateliers', desc: 'Outillage, consommables et matériel pour la production et la maintenance.' },
-    { icon: Tractor, title: 'Agriculture', desc: 'Matériel agricole, irrigation, pompes et accessoires pour exploitations.' },
-    { icon: HardHat, title: 'BTP & chantiers', desc: 'EPI, quincaillerie, tuyauterie et matériel pour le bâtiment.' },
-    { icon: Wrench, title: 'Artisans & PME', desc: 'Droguerie générale, fixations et outillage pour tous les corps de métier.' },
+    { icon: Factory, title: 'Industrie & ateliers', desc: 'Outillage, consommables et matériel pour la production et la maintenance.', accent: 'blue' },
+    { icon: Tractor, title: 'Agriculture', desc: 'Matériel agricole, irrigation, pompes et accessoires pour exploitations.', accent: 'green' },
+    { icon: HardHat, title: 'BTP & chantiers', desc: 'EPI, quincaillerie, tuyauterie et matériel pour le bâtiment.', accent: 'red' },
+    { icon: Wrench, title: 'Artisans & PME', desc: 'Droguerie générale, fixations et outillage pour tous les corps de métier.', accent: 'navy' },
 ];
+
+const ABOUT_IMAGE = '/images/about/workshop.jpg';
+const ABOUT_IMAGE_FALLBACK = 'https://images.unsplash.com/photo-1581092918484-831393343c19?w=900&q=85';
+
+const fadeUp = {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.25 },
+    transition: { duration: 0.5 },
+};
 
 export default function AboutIndex({ stats }) {
     const { company, siteSettings } = usePage().props;
@@ -53,112 +64,106 @@ export default function AboutIndex({ stats }) {
                 breadcrumb={[{ label: 'À propos' }]}
             />
 
-            <section className="section-py">
+            <section className="about-intro section-py">
                 <div className="container-wide">
-                    <div className="grid items-center gap-12 lg:grid-cols-2">
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <h2 className="text-3xl font-bold text-foreground">Qui sommes-nous ?</h2>
-                            <div className="mt-3 h-1 w-16 rounded-full bg-primary" />
-                            <p className="mt-6 leading-relaxed text-muted-foreground">
-                                {company?.description}
-                            </p>
-                            <p className="mt-4 leading-relaxed text-muted-foreground">
-                                Basés à Casablanca, sur le boulevard des Forces Auxiliaires (Hay Moulay Rachid), nous accompagnons les professionnels, artisans, industriels et exploitants agricoles à travers le Maroc.
+                    <div className="about-intro__grid">
+                        <motion.div {...fadeUp}>
+                            <p className="about-eyebrow">Qui sommes-nous</p>
+                            <h2 className="about-intro__title">Votre partenaire matériel pro à Casablanca</h2>
+                            <p className="about-intro__text">{company?.description}</p>
+                            <p className="about-intro__text">
+                                Basés sur le boulevard des Forces Auxiliaires (Hay Moulay Rachid), nous accompagnons les professionnels, artisans, industriels et exploitants agricoles à travers le Maroc.
                             </p>
                             {mapsUrl && (
                                 <Link
                                     href={mapsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-6 inline-flex text-sm font-semibold text-primary hover:underline"
+                                    className="about-intro__link"
                                 >
                                     Voir notre localisation sur Google Maps →
                                 </Link>
                             )}
                         </motion.div>
                         <motion.div
-                            initial={{ opacity: 0, x: 30 }}
+                            initial={{ opacity: 0, x: 40 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="overflow-hidden rounded-2xl shadow-card-hover"
+                            transition={{ duration: 0.65, delay: 0.1 }}
                         >
-                            <img
-                                src="https://images.unsplash.com/photo-1581092918484-831393343c19?w=800&q=80"
-                                alt="Matériel industriel CEMAPROF"
-                                loading="lazy"
-                                className="aspect-[4/3] w-full object-cover"
+                            <CursorParallaxImage
+                                src={ABOUT_IMAGE}
+                                fallbackSrc={ABOUT_IMAGE_FALLBACK}
+                                alt="Atelier industriel CEMAPROF"
+                                className="about-intro__visual rounded-2xl shadow-card-hover"
                             />
                         </motion.div>
                     </div>
                 </div>
             </section>
 
-            <section className="section-py bg-surface">
+            <section className="section-py bg-surface overflow-hidden">
                 <div className="container-wide">
                     <SectionTitle title="Nos activités" subtitle="Les domaines que nous couvrons au quotidien" />
-                    <div className="activity-showcase mx-auto max-w-5xl">
-                        {activityLines.map((line, index) => {
-                            const Icon = activityIcons[index % activityIcons.length];
-                            return (
-                                <motion.div
-                                    key={line}
-                                    initial={{ opacity: 0, y: 16 }}
+                    <ActivitiesShowcase lines={activityLines} icons={activityIcons} />
+                </div>
+            </section>
+
+            <section className="about-dna section-py">
+                <div className="container-wide">
+                    <motion.div className="about-dna__header" {...fadeUp}>
+                        <p className="about-eyebrow">Nos engagements</p>
+                        <h2 className="about-dna__title">Ce qui nous définit &amp; qui nous servons</h2>
+                        <p className="about-dna__subtitle">
+                            Nos valeurs au quotidien et les secteurs que nous accompagnons — clair, concret, sans jargon.
+                        </p>
+                    </motion.div>
+
+                    <div className="about-dna__bento">
+                        <motion.div className="about-values" {...fadeUp} transition={{ duration: 0.5, delay: 0.05 }}>
+                            <h3 className="about-values__title">Nos valeurs</h3>
+                            <ol className="about-values__list">
+                                {values.map((value, index) => (
+                                    <motion.li
+                                        key={value.title}
+                                        className="about-values__item"
+                                        initial={{ opacity: 0, x: -16 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.4, delay: index * 0.08 }}
+                                    >
+                                        <span className="about-values__step">{String(index + 1).padStart(2, '0')}</span>
+                                        <div className="about-values__icon">
+                                            <value.icon className="h-5 w-5" aria-hidden="true" />
+                                        </div>
+                                        <div>
+                                            <h4 className="about-values__label">{value.title}</h4>
+                                            <p className="about-values__desc">{value.desc}</p>
+                                        </div>
+                                    </motion.li>
+                                ))}
+                            </ol>
+                        </motion.div>
+
+                        <div className="about-sectors">
+                            {sectors.map((sector, index) => (
+                                <motion.article
+                                    key={sector.title}
+                                    className={`about-sector about-sector--${sector.accent}`}
+                                    initial={{ opacity: 0, y: 28 }}
                                     whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.4, delay: index * 0.06 }}
-                                    className="activity-showcase__card"
+                                    viewport={{ once: true, amount: 0.3 }}
+                                    transition={{ duration: 0.45, delay: index * 0.07 }}
+                                    whileHover={{ y: -4 }}
                                 >
-                                    <div className="activity-showcase__icon">
-                                        <Icon className="h-5 w-5" aria-hidden="true" />
+                                    <div className="about-sector__icon">
+                                        <sector.icon className="h-6 w-6" aria-hidden="true" />
                                     </div>
-                                    <p className="activity-showcase__label">{line}</p>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            <section className="section-py">
-                <div className="container-wide">
-                    <SectionTitle title="Nos valeurs" subtitle="Ce qui guide notre relation avec les clients" />
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {values.map((v, i) => (
-                            <Card key={i} className="border-0 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                                        <v.icon className="h-6 w-6" />
-                                    </div>
-                                    <h3 className="font-semibold text-foreground">{v.title}</h3>
-                                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{v.desc}</p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section className="section-py bg-surface">
-                <div className="container-wide">
-                    <SectionTitle title="Secteurs servis" subtitle="Des solutions pour chaque métier" />
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {sectors.map((s, i) => (
-                            <Card key={i} className="border-0 text-center shadow-card">
-                                <CardContent className="p-6">
-                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                                        <s.icon className="h-7 w-7" />
-                                    </div>
-                                    <h3 className="font-semibold">{s.title}</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                    <h3 className="about-sector__title">{sector.title}</h3>
+                                    <p className="about-sector__desc">{sector.desc}</p>
+                                </motion.article>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>

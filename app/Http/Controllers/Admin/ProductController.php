@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\AuditLogger;
 use App\Services\ImageUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,6 +57,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Form', [
             'product' => null,
             'categories' => Category::orderBy('name')->get(['id', 'name']),
+            'brandOptions' => config('cemaprof.partner_brands', []),
         ]);
     }
 
@@ -71,7 +73,12 @@ class ProductController extends Controller
             $data['images'] = ImageUploadService::storeMany($request->file('gallery'), 'products/gallery');
         }
 
-        Product::create($data);
+        $product = Product::create($data);
+
+        AuditLogger::log('product.created', 'product', $product->id, [
+            'name' => $product->name,
+            'slug' => $product->slug,
+        ]);
 
         return redirect()->route('admin.products.index')->with('success', 'Produit créé avec succès.');
     }
@@ -81,6 +88,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Form', [
             'product' => $product->load('category'),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
+            'brandOptions' => config('cemaprof.partner_brands', []),
         ]);
     }
 
@@ -110,6 +118,11 @@ class ProductController extends Controller
 
         $product->update($data);
 
+        AuditLogger::log('product.updated', 'product', $product->id, [
+            'name' => $product->name,
+            'slug' => $product->slug,
+        ]);
+
         return redirect()->route('admin.products.index')->with('success', 'Produit mis à jour avec succès.');
     }
 
@@ -120,6 +133,11 @@ class ProductController extends Controller
             ImageUploadService::deleteIfLocal($image);
         }
 
+        AuditLogger::log('product.deleted', 'product', $product->id, [
+            'name' => $product->name,
+            'slug' => $product->slug,
+        ]);
+
         $product->delete();
 
         return back()->with('success', 'Produit supprimé.');
@@ -129,12 +147,20 @@ class ProductController extends Controller
     {
         $product->update(['is_active' => ! $product->is_active]);
 
+        AuditLogger::log('product.toggle_active', 'product', $product->id, [
+            'is_active' => $product->is_active,
+        ]);
+
         return back();
     }
 
     public function toggleFeatured(Product $product): RedirectResponse
     {
         $product->update(['is_featured' => ! $product->is_featured]);
+
+        AuditLogger::log('product.toggle_featured', 'product', $product->id, [
+            'is_featured' => $product->is_featured,
+        ]);
 
         return back();
     }
@@ -148,6 +174,8 @@ class ProductController extends Controller
             'short_description' => $request->short_description,
             'description' => $request->description,
             'price' => $request->filled('price') ? $request->price : null,
+            'brand' => $request->brand ?: null,
+            'availability' => $request->availability ?: 'in_stock',
             'badge' => $request->badge ?: null,
             'is_featured' => $request->boolean('is_featured'),
             'is_active' => $request->boolean('is_active', true),

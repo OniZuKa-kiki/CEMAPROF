@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,11 +18,40 @@ export default function LightSelect({
     renderTrigger,
     renderItem,
     align = 'start',
+    fitContent = false,
 }) {
     const [open, setOpen] = useState(false);
+    const [fitWidth, setFitWidth] = useState(null);
     const rootRef = useRef(null);
+    const sizerRef = useRef(null);
     const listId = useId();
     const selected = options.find((option) => option.value === value);
+
+    useLayoutEffect(() => {
+        if (!fitContent || !sizerRef.current) {
+            setFitWidth(null);
+            return;
+        }
+
+        const measure = () => {
+            const items = sizerRef.current?.querySelectorAll('[data-sizer-item]');
+            if (!items?.length) {
+                return;
+            }
+
+            let max = 0;
+            items.forEach((item) => {
+                max = Math.max(max, item.getBoundingClientRect().width);
+            });
+
+            setFitWidth(Math.ceil(max));
+        };
+
+        measure();
+        window.addEventListener('resize', measure);
+
+        return () => window.removeEventListener('resize', measure);
+    }, [fitContent, options, renderItem]);
 
     useEffect(() => {
         if (!open) {
@@ -56,18 +85,50 @@ export default function LightSelect({
     };
 
     return (
-        <div ref={rootRef} className="light-select relative w-full">
+        <div
+            ref={rootRef}
+            className={cn('light-select relative', fitContent ? 'light-select--fit w-auto' : 'w-full')}
+            style={fitContent && fitWidth ? { width: fitWidth } : undefined}
+        >
+            {fitContent && (
+                <div
+                    ref={sizerRef}
+                    className="pointer-events-none invisible absolute left-0 top-0 -z-10 h-0 overflow-hidden"
+                    aria-hidden="true"
+                >
+                    {options.map((option) => (
+                        <div
+                            key={option.value}
+                            data-sizer-item
+                            className={cn(
+                                'light-select__trigger inline-flex items-center gap-2 whitespace-nowrap',
+                                triggerClassName,
+                            )}
+                        >
+                            {renderItem ? renderItem(option, false) : option.label}
+                            <ChevronDown className="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+                        </div>
+                    ))}
+                </div>
+            )}
             <button
                 type="button"
                 id={id}
-                className={cn('light-select__trigger flex w-full items-center justify-between gap-2', triggerClassName)}
+                className={cn(
+                    'light-select__trigger flex items-center justify-between gap-2',
+                    fitContent ? 'w-full whitespace-nowrap' : 'w-full',
+                    triggerClassName,
+                )}
                 aria-label={ariaLabel}
                 aria-haspopup="listbox"
                 aria-expanded={open}
                 aria-controls={listId}
                 onClick={() => setOpen((current) => !current)}
             >
-                <span className="light-select__value flex min-w-0 flex-1 items-center gap-2 text-left">
+                <span className={cn(
+                    'light-select__value flex items-center gap-2 text-left',
+                    fitContent ? 'min-w-0 shrink-0' : 'min-w-0 flex-1',
+                )}>
                     {renderTrigger ? renderTrigger(selected) : (selected?.label ?? placeholder)}
                 </span>
                 <ChevronDown
@@ -82,10 +143,12 @@ export default function LightSelect({
                     role="listbox"
                     aria-label={ariaLabel}
                     className={cn(
-                        'light-select__content absolute left-0 right-0 z-[80] mt-1 max-h-96 w-full overflow-auto rounded-xl border border-gray-200 bg-white p-1 shadow-md',
-                        align === 'end' && 'left-auto',
+                        'light-select__content absolute z-[80] mt-1 max-h-96 overflow-auto rounded-xl border border-gray-200 bg-white p-1 shadow-md',
+                        fitContent ? 'left-0 w-max min-w-full whitespace-nowrap' : 'left-0 right-0 w-full',
+                        align === 'end' && 'left-auto right-0',
                         contentClassName,
                     )}
+                    style={fitContent && fitWidth ? { minWidth: fitWidth } : undefined}
                 >
                     {options.map((option) => {
                         const isSelected = option.value === value;

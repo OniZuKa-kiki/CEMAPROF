@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Mail\ProductImportCompletedMail;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Services\AuditLogger;
 use App\Services\MailRecipientService;
 use App\Services\ProductImportService;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,12 @@ class ProductImportController extends Controller
         ]);
 
         $result = $importer->importFromCsv($request->file('file'));
+
+        AuditLogger::log('products.imported', 'product_import', null, [
+            'created' => $result['created'],
+            'skipped' => $result['skipped'],
+            'errors' => count($result['errors']),
+        ]);
 
         if (MailRecipientService::isFeatureEnabled('import_completed')) {
             $mailable = new ProductImportCompletedMail(

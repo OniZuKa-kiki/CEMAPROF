@@ -17,6 +17,8 @@ class Product extends Model
         'short_description',
         'description',
         'price',
+        'brand',
+        'availability',
         'image_url',
         'images',
         'badge',

@@ -12,6 +12,8 @@ import { Button } from '@/Components/ui/button';
 import { useToast } from '@/Components/ui/use-toast';
 import { useQuoteCart, buildQuoteContactUrl, buildWhatsAppProductMessage } from '@/hooks/useQuoteCart';
 import { badgeLabels, formatPrice, formatWhatsAppUrl } from '@/lib/utils';
+import JsonLd from '@/Components/JsonLd';
+import { buildProductSchema } from '@/lib/structuredData';
 
 const badgeVariantMap = {
     nouveau: 'default',
@@ -29,7 +31,7 @@ function getProductImages(product) {
     return product?.image_url ? [product.image_url] : [];
 }
 
-export default function ProductShow({ product, relatedProducts = [] }) {
+export default function ProductShow({ product, relatedProducts = [], canonicalUrl = '' }) {
     const { whatsappNumber } = usePage().props;
     const { toast } = useToast();
     const { addItem, items } = useQuoteCart();
@@ -101,14 +103,18 @@ export default function ProductShow({ product, relatedProducts = [] }) {
 
     const contactUrl = buildQuoteContactUrl([quoteItem]);
     const whatsappMessage = buildWhatsAppProductMessage(product, quantity);
+    const productSchema = buildProductSchema(product, canonicalUrl);
 
     return (
         <MainLayout>
             <Head title={`${product.name} — CEMAPROF`}>
                 {metaDescription ? <meta head-key="description" name="description" content={metaDescription} /> : null}
+                {canonicalUrl ? <link head-key="canonical" rel="canonical" href={canonicalUrl} /> : null}
                 <meta head-key="og:title" property="og:title" content={product.name} />
                 {product.short_description ? <meta head-key="og:description" property="og:description" content={product.short_description} /> : null}
                 {product.image_url ? <meta head-key="og:image" property="og:image" content={product.image_url} /> : null}
+                {canonicalUrl ? <meta head-key="og:url" property="og:url" content={canonicalUrl} /> : null}
+                <JsonLd data={productSchema} id="product" />
             </Head>
 
             <PageHero

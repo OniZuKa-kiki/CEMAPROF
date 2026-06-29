@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\SiteSetting;
+use App\Services\CatalogCache;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,13 +39,14 @@ class HandleInertiaRequests extends Middleware
             'siteSettings' => rescue(fn () => SiteSetting::allCached(), [], false),
             'whatsappNumber' => rescue(fn () => SiteSetting::get('whatsapp') ?? config('cemaprof.whatsapp'), config('cemaprof.whatsapp'), false),
             'company' => config('cemaprof.company'),
+            'appUrl' => config('app.url'),
             'navCategories' => rescue(
-                fn () => Category::query()
+                fn () => CatalogCache::rememberArray('nav_categories', fn () => \App\Models\Category::query()
                     ->catalog()
                     ->orderBy('name')
                     ->limit(6)
-                    ->get(['id', 'name', 'slug']),
-                collect(),
+                    ->get(['id', 'name', 'slug'])),
+                [],
                 false
             ),
             'admin' => [

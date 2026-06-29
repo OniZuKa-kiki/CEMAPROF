@@ -30,6 +30,12 @@ return [
         'quincaillerie-droguerie',
     ],
 
+    'partner_brands' => [
+        'Bosch', 'Makita', 'DeWalt', 'Stanley', 'Facom', 'Schneider', 'Grundfos',
+        'Kärcher', '3M', 'Hitachi', 'Metabo', 'Würth', 'Nilfisk', 'Festool',
+        'Knipex', 'Bahco', 'Legrand', 'Hilti', 'Saint-Gobain',
+    ],
+
     'mail' => [
         'urgent_quote_min_products' => (int) env('MAIL_URGENT_QUOTE_MIN_PRODUCTS', 2),
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SettingRequest;
 use App\Models\SiteSetting;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -38,6 +39,10 @@ class SettingController extends Controller
         }
 
         SiteSetting::clearCache();
+
+        AuditLogger::log('settings.updated', 'settings', null, [
+            'keys' => array_keys($request->validated()),
+        ]);
 
         return back()->with('success', 'Paramètres enregistrés avec succès.');
     }

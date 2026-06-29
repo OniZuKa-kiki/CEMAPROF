@@ -57,6 +57,20 @@ export default function MessageShow({ message }) {
                         <div><p className="text-xs text-muted-foreground">Email</p><p className="font-medium">{message.email}</p></div>
                         {message.phone && <div><p className="text-xs text-muted-foreground">Téléphone</p><p className="font-medium">{message.phone}</p></div>}
                         {message.company && <div><p className="text-xs text-muted-foreground">Entreprise</p><p className="font-medium">{message.company}</p></div>}
+                        {(message.delivery_mode || message.delivery_city || message.delivery_notes) && (
+                            <div className="sm:col-span-2">
+                                <p className="text-xs text-muted-foreground">Expédition (indicatif)</p>
+                                <p className="font-medium">
+                                    {[
+                                        message.delivery_mode === 'livraison' && 'Livraison au Maroc',
+                                        message.delivery_mode === 'retrait' && 'Retrait à Casablanca',
+                                        message.delivery_mode === 'a_preciser' && 'À préciser',
+                                        message.delivery_city && `Ville : ${message.delivery_city}`,
+                                        message.delivery_notes,
+                                    ].filter(Boolean).join(' · ')}
+                                </p>
+                            </div>
+                        )}
                         {message.product_slug && (
                             <div>
                                 <p className="text-xs text-muted-foreground">Produit(s)</p>

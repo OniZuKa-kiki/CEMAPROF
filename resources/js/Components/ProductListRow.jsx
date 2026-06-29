@@ -49,12 +49,13 @@ export default function ProductListRow({ product, className }) {
     };
 
     return (
-        <article className={cn('product-list-row reveal-on-scroll', className)}>
-            <Link href={`/produits/${product.slug}`} className="product-list-row__image">
+        <article className={cn('product-list-row group reveal-on-scroll', className)}>
+            <Link href={`/produits/${product.slug}`} className="product-list-row__image product-card__media">
                 <img
                     src={product.image_url || fallbackImage}
                     alt={product.name}
                     loading="lazy"
+                    className="product-card__img"
                 />
                 {product.badge && (
                     <Badge variant={badgeVariantMap[product.badge]} className="product-list-row__badge">
@@ -63,7 +64,7 @@ export default function ProductListRow({ product, className }) {
                 )}
             </Link>
 
-            <div className="product-list-row__body">
+            <div className="product-list-row__body product-card__body">
                 {product.category && (
                     <p className="product-list-row__category">{product.category.name}</p>
                 )}
@@ -71,45 +72,47 @@ export default function ProductListRow({ product, className }) {
                     <h3 className="product-list-row__title">{product.name}</h3>
                 </Link>
                 {product.short_description && (
-                    <p className="product-list-row__desc">{product.short_description}</p>
+                    <p className="product-list-row__desc product-card__desc">{product.short_description}</p>
                 )}
-                <p className="product-list-row__price">
-                    {displayPrice || 'Prix sur devis'}
-                </p>
+                {displayPrice ? (
+                    <p className="product-list-row__price">{displayPrice}</p>
+                ) : (
+                    <p className="product-list-row__price product-list-row__price--muted">Prix sur devis</p>
+                )}
                 <QuantityStepper
                     compact
                     value={quantity}
                     onChange={setQuantity}
-                    className="product-list-row__qty mt-2"
+                    className="product-list-row__qty product-card__qty"
+                    max={999}
                 />
             </div>
 
-            <div className="product-list-row__actions">
-                <Button
-                    variant="outline"
-                    size="sm"
+            <div className="product-list-row__actions product-card__actions">
+                <button
+                    type="button"
+                    onClick={handleAddToQuote}
                     className={cn(
-                        'product-list-row__cta product-list-row__cta--select',
+                        'product-card__btn-select inline-flex items-center justify-center gap-2',
                         inCart && 'product-card__btn-select--active',
                     )}
-                    onClick={handleAddToQuote}
                 >
                     {inCart ? (
                         <>
                             <Check className="h-4 w-4" />
-                            Mettre à jour
+                            Mettre à jour ({quantity})
                         </>
                     ) : (
                         <>
                             <Plus className="h-4 w-4" />
-                            Ajouter
+                            Ajouter à ma sélection
                         </>
                     )}
-                </Button>
-                <Button variant="accent" className="product-list-row__cta" size="sm" asChild>
+                </button>
+                <Button variant="accent" size="sm" className="product-card__btn-quote" asChild>
                     <Link href={quoteUrl}>
                         <FileText className="h-4 w-4" />
-                        Devis
+                        Demander un devis
                     </Link>
                 </Button>
             </div>

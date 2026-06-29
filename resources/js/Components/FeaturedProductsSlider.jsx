@@ -83,7 +83,7 @@ export default function FeaturedProductsSlider({ products = [] }) {
                                     key={product.id}
                                     className="basis-full pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                                 >
-                                    <ProductCard product={product} className="h-full" />
+                                    <ProductCard product={product} compact className="h-full" />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>

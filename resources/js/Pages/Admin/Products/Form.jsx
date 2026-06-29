@@ -9,9 +9,9 @@ import { Label } from '@/Components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Switch } from '@/Components/ui/switch';
 import { Card, CardContent } from '@/Components/ui/card';
-import { slugify, badgeLabels } from '@/lib/utils';
+import { slugify, badgeLabels, availabilityLabels } from '@/lib/utils';
 
-export default function ProductForm({ product, categories }) {
+export default function ProductForm({ product, categories, brandOptions = [] }) {
     const isEdit = !!product;
 
     const { data, setData, post, put, processing, errors } = useForm({
@@ -21,6 +21,8 @@ export default function ProductForm({ product, categories }) {
         short_description: product?.short_description || '',
         description: product?.description || '',
         price: product?.price != null ? String(product.price) : '',
+        brand: product?.brand || '',
+        availability: product?.availability || 'in_stock',
         badge: product?.badge || '',
         is_featured: product?.is_featured ?? false,
         is_active: product?.is_active ?? true,
@@ -157,6 +159,34 @@ export default function ProductForm({ product, categories }) {
                                             ))}
                                         </div>
                                     )}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Marque</Label>
+                                    <Select
+                                        value={data.brand || 'none'}
+                                        onValueChange={(v) => setData('brand', v === 'none' ? '' : v)}
+                                    >
+                                        <SelectTrigger><SelectValue placeholder="Choisir une marque..." /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">Aucune</SelectItem>
+                                            {brandOptions.map((name) => (
+                                                <SelectItem key={name} value={name}>{name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.brand && <p className="text-sm text-accent">{errors.brand}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Disponibilité</Label>
+                                    <Select value={data.availability} onValueChange={(v) => setData('availability', v)}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(availabilityLabels).map(([k, v]) => (
+                                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.availability && <p className="text-sm text-accent">{errors.availability}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Badge</Label>

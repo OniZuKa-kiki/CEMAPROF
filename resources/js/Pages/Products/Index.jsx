@@ -52,9 +52,8 @@ import { Pagination } from '@/Components/ui/pagination';
 
 import PageCta from '@/Components/PageCta';
 
-import { badgeLabels } from '@/lib/utils';
-
-import { cn } from '@/lib/utils';
+import { availabilityLabels, cn } from '@/lib/utils';
+import PriceRangeSlider from '@/Components/PriceRangeSlider';
 
 
 
@@ -84,7 +83,7 @@ const VIEW_STORAGE_KEY = 'cemaprof-catalog-view';
 
 
 
-function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
+function CatalogFilterBar({ categories, brands, priceBounds, filters, filterCounts, onFilterChange, onSearch, variant = 'full' }) {
 
     const [search, setSearch] = useState(filters.search || '');
 
@@ -132,18 +131,33 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
 
 
 
-    const toggleBadge = (value) => {
-
-        onFilterChange({ badge: filters?.badge === value ? undefined : value });
-
+    const toggleAvailability = (value) => {
+        onFilterChange({ availability: filters?.availability === value ? undefined : value });
     };
 
+    const toggleBrand = (value) => {
+        onFilterChange({ brand: filters?.brand === value ? undefined : value });
+    };
 
+    const priceMin = priceBounds?.min ?? 0;
+    const priceMax = priceBounds?.max ?? 5000;
+    const activePriceMin = filters?.price_min != null ? Number(filters.price_min) : priceMin;
+    const activePriceMax = filters?.price_max != null ? Number(filters.price_max) : priceMax;
+
+
+
+    const showToolbar = variant === 'full' || variant === 'toolbar';
+    const showFilters = variant === 'full' || variant === 'sidebar';
 
     return (
 
-        <div className="catalog-filter-bar">
+        <div className={cn(
+            'catalog-filter-bar',
+            variant === 'sidebar' && 'catalog-filter-bar--sidebar',
+            variant === 'toolbar' && 'catalog-filter-bar--toolbar',
+        )}>
 
+            {showToolbar && (
             <div className="catalog-filter-bar__top">
 
                 <ProductSearchInput
@@ -162,7 +176,7 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
 
 
 
-                <div className="catalog-sort-wrapper">
+                <div className={cn('catalog-sort-wrapper', showToolbar && 'catalog-sort-wrapper--fit')}>
 
                     <LightSelect
 
@@ -171,6 +185,8 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
                         onValueChange={(value) => onFilterChange({ sort: value })}
 
                         ariaLabel="Trier les produits"
+
+                        fitContent={showToolbar}
 
                         triggerClassName="catalog-sort-trigger"
 
@@ -221,9 +237,10 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
                 </div>
 
             </div>
+            )}
 
-
-
+            {showFilters && (
+            <>
             <div className="catalog-filter-bar__group">
 
                 <span className="catalog-filter-bar__label">
@@ -247,6 +264,9 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
                     >
 
                         Tous
+                        {filterCounts?.total != null && (
+                            <span className="filter-chip__count">({filterCounts.total})</span>
+                        )}
 
                     </button>
 
@@ -271,6 +291,9 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
                         >
 
                             {cat.name}
+                            {filterCounts?.categories?.[cat.id] != null && (
+                                <span className="filter-chip__count">({filterCounts.categories[cat.id]})</span>
+                            )}
 
                         </button>
 
@@ -283,44 +306,67 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
 
 
             <div className="catalog-filter-bar__group">
-
-                <span className="catalog-filter-bar__label">Badges</span>
-
-                <div className="catalog-filter-bar__badges">
-
-                    {Object.entries(badgeLabels).map(([value, label]) => (
-
+                <span className="catalog-filter-bar__label">Marques</span>
+                <div className="catalog-filter-bar__chips custom-scrollbar">
+                    {brands?.length ? brands.map((brand) => (
                         <button
-
-                            key={value}
-
+                            key={brand}
                             type="button"
-
                             className={cn(
-
-                                'filter-badge-chip',
-
-                                `filter-badge-chip--${value}`,
-
-                                filters?.badge === value && 'filter-badge-chip--active',
-
+                                'filter-chip',
+                                filters?.brand === brand && 'filter-chip--active',
                             )}
-
-                            onClick={() => toggleBadge(value)}
-
+                            onClick={() => toggleBrand(brand)}
                         >
-
-                            <span className="filter-badge-chip__dot" aria-hidden="true" />
-
-                            {label}
-
+                            {brand}
+                            {filterCounts?.brands?.[brand] != null && (
+                                <span className="filter-chip__count">({filterCounts.brands[brand]})</span>
+                            )}
                         </button>
-
-                    ))}
-
+                    )) : (
+                        <span className="text-xs text-muted-foreground">Aucune marque disponible</span>
+                    )}
                 </div>
-
             </div>
+
+            <div className="catalog-filter-bar__group">
+                <span className="catalog-filter-bar__label">Disponibilité</span>
+                <div className="catalog-filter-bar__badges">
+                    {Object.entries(availabilityLabels).map(([value, label]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            className={cn(
+                                'filter-badge-chip',
+                                `filter-badge-chip--${value === 'on_sale' ? 'promo' : value === 'in_stock' ? 'nouveau' : 'populaire'}`,
+                                filters?.availability === value && 'filter-badge-chip--active',
+                            )}
+                            onClick={() => toggleAvailability(value)}
+                        >
+                            <span className="filter-badge-chip__dot" aria-hidden="true" />
+                            {label}
+                            {filterCounts?.availability?.[value] != null && (
+                                <span className="filter-chip__count">({filterCounts.availability[value]})</span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {priceMax > priceMin && (
+                <div className="catalog-filter-bar__group">
+                    <span className="catalog-filter-bar__label">Prix</span>
+                    <PriceRangeSlider
+                        min={Math.floor(priceMin)}
+                        max={Math.ceil(priceMax)}
+                        valueMin={activePriceMin}
+                        valueMax={activePriceMax}
+                        onChange={onFilterChange}
+                    />
+                </div>
+            )}
+            </>
+            )}
 
         </div>
 
@@ -330,7 +376,7 @@ function CatalogFilterBar({ categories, filters, onFilterChange, onSearch }) {
 
 
 
-export default function ProductsIndex({ products, categories, filters }) {
+export default function ProductsIndex({ products, categories, brands, priceBounds, filterCounts, filters }) {
 
     const [viewMode, setViewMode] = useState('grid');
 
@@ -342,8 +388,10 @@ export default function ProductsIndex({ products, categories, filters }) {
 
         filters?.category_id,
 
-        filters?.badge,
-
+        filters?.brand,
+        filters?.availability,
+        filters?.price_min,
+        filters?.price_max,
         filters?.sort,
 
         products?.current_page,
@@ -486,19 +534,50 @@ export default function ProductsIndex({ products, categories, filters }) {
 
             <div className="container-wide section-py">
 
-                <CatalogFilterBar
+                <div className="catalog-filters-mobile">
+                    <CatalogFilterBar
+                        categories={categories}
+                        brands={brands}
+                        priceBounds={priceBounds}
+                        filters={filters}
+                        filterCounts={filterCounts}
+                        onFilterChange={applyFilters}
+                        onSearch={(search) => applyFilters({ search })}
+                        variant="full"
+                    />
+                </div>
 
-                    categories={categories}
+                <div className="catalog-page-layout">
+                    <aside className="catalog-filters-sidebar" aria-label="Filtres du catalogue">
+                        <div className="catalog-sidebar__title">
+                            <Filter className="h-4 w-4" aria-hidden="true" />
+                            Filtres
+                        </div>
+                        <CatalogFilterBar
+                            categories={categories}
+                            brands={brands}
+                            priceBounds={priceBounds}
+                            filters={filters}
+                            filterCounts={filterCounts}
+                            onFilterChange={applyFilters}
+                            onSearch={(search) => applyFilters({ search })}
+                            variant="sidebar"
+                        />
+                    </aside>
 
-                    filters={filters}
-
-                    onFilterChange={applyFilters}
-
-                    onSearch={(search) => applyFilters({ search })}
-
-                />
-
-
+                    <div className="catalog-main min-w-0">
+                        <div className="catalog-main-toolbar">
+                            <CatalogFilterBar
+                                categories={categories}
+                                brands={brands}
+                                priceBounds={priceBounds}
+                                filters={filters}
+                                filterCounts={filterCounts}
+                                onFilterChange={applyFilters}
+                                onSearch={(search) => applyFilters({ search })}
+                                variant="toolbar"
+                            />
+                        </div>
 
                 <div className="mb-6 mt-4 flex flex-wrap items-center justify-between gap-4">
 
@@ -582,11 +661,11 @@ export default function ProductsIndex({ products, categories, filters }) {
 
                                 {viewMode === 'grid' ? (
 
-                                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+                                    <div className="catalog-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 
                                         {products.data.map((product) => (
 
-                                            <ProductCard key={product.id} product={product} />
+                                            <ProductCard key={product.id} product={product} compact />
 
                                         ))}
 
@@ -594,7 +673,7 @@ export default function ProductsIndex({ products, categories, filters }) {
 
                                 ) : (
 
-                                    <div className="catalog-list-view space-y-4">
+                                    <div className="catalog-list-view space-y-3">
 
                                         {products.data.map((product) => (
 
@@ -646,6 +725,9 @@ export default function ProductsIndex({ products, categories, filters }) {
 
                     </AnimatePresence>
 
+                </div>
+
+                    </div>
                 </div>
 
             </div>
