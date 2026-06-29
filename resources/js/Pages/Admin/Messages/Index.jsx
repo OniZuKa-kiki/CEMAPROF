@@ -2,16 +2,34 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Eye } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { AdminFilterBar, AdminFilterControls, AdminFilterReset, AdminFilterSearch } from '@/Components/Admin/AdminFilterBar';
+import AdminSelect from '@/Components/Admin/AdminSelect';
 import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
 import { Badge } from '@/Components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/Components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import { Pagination } from '@/Components/ui/pagination';
 import { subjectOptions } from '@/lib/utils';
 
 const subjectLabels = Object.fromEntries(subjectOptions.map((o) => [o.value, o.label]));
+
+const subjectFilterOptions = [
+    { value: 'all', label: 'Tous les sujets' },
+    ...subjectOptions,
+];
+
+const sortOptions = [
+    { value: 'recent', label: 'Plus récents' },
+    { value: 'oldest', label: 'Plus anciens' },
+    { value: 'name', label: 'Nom A → Z' },
+    { value: 'name_desc', label: 'Nom Z → A' },
+];
+
+const perPageOptions = [
+    { value: '25', label: '25 / page' },
+    { value: '50', label: '50 / page' },
+    { value: '100', label: '100 / page' },
+];
 
 export default function MessagesIndex({ messages, filters, counts }) {
     const [search, setSearch] = useState(filters.search || '');
@@ -19,6 +37,13 @@ export default function MessagesIndex({ messages, filters, counts }) {
     const applyFilters = (newFilters) => {
         router.get('/admin/messages', { ...filters, ...newFilters, page: 1 }, { preserveState: true });
     };
+
+    const hasActiveFilters = Boolean(
+        filters.search
+        || filters.subject
+        || (filters.sort && filters.sort !== 'recent')
+        || (filters.per_page && String(filters.per_page) !== '25'),
+    );
 
     return (
         <AdminLayout title="Messages">
@@ -36,7 +61,7 @@ export default function MessagesIndex({ messages, filters, counts }) {
             <Tabs
                 value={filters.tab || 'all'}
                 onValueChange={(tab) => applyFilters({ tab })}
-                className="mb-6"
+                className="mb-4"
             >
                 <TabsList>
                     <TabsTrigger value="all">Tous ({counts.all})</TabsTrigger>
@@ -45,56 +70,43 @@ export default function MessagesIndex({ messages, filters, counts }) {
                 </TabsList>
             </Tabs>
 
-            <div className="mb-6 flex flex-wrap gap-3">
-                <Input
-                    placeholder="Rechercher (nom, email, message...)"
+            <AdminFilterBar>
+                <AdminFilterSearch
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-64"
-                    onKeyDown={(e) => e.key === 'Enter' && applyFilters({ search: search.trim() || undefined })}
+                    onSubmit={() => applyFilters({ search: search.trim() || undefined })}
+                    placeholder="Rechercher (nom, email, message...)"
                 />
-                <Button variant="outline" size="sm" onClick={() => applyFilters({ search: search.trim() || undefined })}>
-                    Rechercher
-                </Button>
-                <Select value={filters.subject || 'all'} onValueChange={(v) => applyFilters({ subject: v === 'all' ? undefined : v })}>
-                    <SelectTrigger className="w-48"><SelectValue placeholder="Sujet" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Tous les sujets</SelectItem>
-                        {subjectOptions.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select value={filters.sort || 'recent'} onValueChange={(v) => applyFilters({ sort: v })}>
-                    <SelectTrigger className="w-44"><SelectValue placeholder="Tri" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="recent">Plus récents</SelectItem>
-                        <SelectItem value="oldest">Plus anciens</SelectItem>
-                        <SelectItem value="name">Nom A → Z</SelectItem>
-                        <SelectItem value="name_desc">Nom Z → A</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={String(filters.per_page || 25)} onValueChange={(v) => applyFilters({ per_page: v })}>
-                    <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="25">25 / page</SelectItem>
-                        <SelectItem value="50">50 / page</SelectItem>
-                        <SelectItem value="100">100 / page</SelectItem>
-                    </SelectContent>
-                </Select>
-                {(filters.search || filters.subject || filters.sort !== 'recent' || filters.per_page) && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                            setSearch('');
-                            router.get('/admin/messages', { tab: filters.tab || 'all' }, { preserveState: true });
-                        }}
-                    >
-                        Réinitialiser
-                    </Button>
-                )}
-            </div>
+                <AdminFilterControls>
+                    <AdminSelect
+                        ariaLabel="Filtrer par sujet"
+                        value={filters.subject || 'all'}
+                        onValueChange={(v) => applyFilters({ subject: v === 'all' ? undefined : v })}
+                        options={subjectFilterOptions}
+                        placeholder="Sujet"
+                    />
+                    <AdminSelect
+                        ariaLabel="Trier les messages"
+                        value={filters.sort || 'recent'}
+                        onValueChange={(v) => applyFilters({ sort: v })}
+                        options={sortOptions}
+                        placeholder="Tri"
+                    />
+                    <AdminSelect
+                        ariaLabel="Messages par page"
+                        value={String(filters.per_page || 25)}
+                        onValueChange={(v) => applyFilters({ per_page: v })}
+                        options={perPageOptions}
+                    />
+                </AdminFilterControls>
+                <AdminFilterReset
+                    visible={hasActiveFilters}
+                    onClick={() => {
+                        setSearch('');
+                        router.get('/admin/messages', { tab: filters.tab || 'all' }, { preserveState: true });
+                    }}
+                />
+            </AdminFilterBar>
 
             <div className="overflow-hidden rounded-2xl border bg-white shadow-card">
                 <Table>

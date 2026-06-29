@@ -24,4 +24,15 @@ class CategoryRequest extends FormRequest
             'image' => ['nullable', 'image', 'max:5120'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Le nom de la catégorie est obligatoire.',
+            'slug.required' => 'Le slug est obligatoire.',
+            'slug.unique' => 'Ce slug est déjà utilisé par une autre catégorie.',
+            'image.image' => 'Le fichier doit être une image.',
+            'image.max' => 'L\'image ne peut pas dépasser 5 Mo.',
+        ];
+    }
 }

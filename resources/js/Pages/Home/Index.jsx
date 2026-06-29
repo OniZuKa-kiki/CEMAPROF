@@ -8,9 +8,10 @@ import CounterSection from '@/Components/CounterSection';
 import PageCta from '@/Components/PageCta';
 import TestimonialsSection from '@/Components/TestimonialsSection';
 import JsonLd from '@/Components/JsonLd';
+import { LOGO_PATH } from '@/lib/siteAssets';
 import { buildOrganizationSchema, buildWebSiteSchema } from '@/lib/structuredData';
 
-export default function Home({ featuredProducts, categories, stats }) {
+export default function Home({ featuredProducts, categories, stats, partnerBrands }) {
     const { company, appUrl, siteSettings } = usePage().props;
     const organizationSchema = buildOrganizationSchema({ appUrl, company, siteSettings });
     const websiteSchema = buildWebSiteSchema(appUrl);
@@ -22,7 +23,7 @@ export default function Home({ featuredProducts, categories, stats }) {
                 <link head-key="canonical" rel="canonical" href={appUrl || '/'} />
                 <meta head-key="og:title" property="og:title" content="CEMAPROF — Importateur · Distributeur" />
                 <meta head-key="og:description" property="og:description" content={company?.short_description ?? 'Votre partenaire pour l\'outillage et le matériel industriel au Maroc.'} />
-                <meta head-key="og:image" property="og:image" content="/images/logo.png" />
+                <meta head-key="og:image" property="og:image" content={LOGO_PATH} />
                 <JsonLd data={organizationSchema} id="organization" />
                 <JsonLd data={websiteSchema} id="website" />
             </Head>
@@ -31,7 +32,7 @@ export default function Home({ featuredProducts, categories, stats }) {
 
             <CategoryShowcaseSlider categories={categories} />
 
-            <BrandMarquee />
+            <BrandMarquee brands={partnerBrands} />
 
             <FeaturedProductsSlider products={featuredProducts} />
 

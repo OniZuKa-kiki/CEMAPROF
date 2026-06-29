@@ -1,6 +1,20 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Check, ChevronDown, Search } from 'lucide-react';
+import { matchesSearch } from '@/lib/searchNormalize';
 import { cn } from '@/lib/utils';
+
+function orderOptions(options, pinnedValues = []) {
+    if (!pinnedValues.length) {
+        return options;
+    }
+
+    const pinned = pinnedValues
+        .map((value) => options.find((option) => option.value === value))
+        .filter(Boolean);
+    const rest = options.filter((option) => !pinnedValues.includes(option.value));
+
+    return [...pinned, ...rest];
+}
 
 /**
  * Accessible dropdown without Radix — avoids react-remove-scroll (white bar on open).
@@ -19,13 +33,37 @@ export default function LightSelect({
     renderItem,
     align = 'start',
     fitContent = false,
+    searchable = false,
+    pinnedValues = [],
+    searchPlaceholder = 'Rechercher…',
 }) {
     const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
     const [fitWidth, setFitWidth] = useState(null);
     const rootRef = useRef(null);
     const sizerRef = useRef(null);
+    const searchRef = useRef(null);
     const listId = useId();
     const selected = options.find((option) => option.value === value);
+    const enableSearch = searchable === true;
+
+    const orderedOptions = useMemo(
+        () => orderOptions(options, pinnedValues),
+        [options, pinnedValues],
+    );
+
+    const visibleOptions = useMemo(() => {
+        const trimmed = query.trim().toLowerCase();
+
+        if (!enableSearch || !trimmed) {
+            return orderedOptions;
+        }
+
+        return orderedOptions.filter((option) => (
+            pinnedValues.includes(option.value)
+            || matchesSearch(option.label, trimmed)
+        ));
+    }, [orderedOptions, query, enableSearch, pinnedValues]);
 
     useLayoutEffect(() => {
         if (!fitContent || !sizerRef.current) {
@@ -55,6 +93,7 @@ export default function LightSelect({
 
     useEffect(() => {
         if (!open) {
+            setQuery('');
             return undefined;
         }
 
@@ -73,15 +112,20 @@ export default function LightSelect({
         document.addEventListener('mousedown', closeOnOutside);
         document.addEventListener('keydown', closeOnEscape);
 
+        if (enableSearch) {
+            requestAnimationFrame(() => searchRef.current?.focus());
+        }
+
         return () => {
             document.removeEventListener('mousedown', closeOnOutside);
             document.removeEventListener('keydown', closeOnEscape);
         };
-    }, [open]);
+    }, [open, enableSearch]);
 
     const handleSelect = (nextValue) => {
         onValueChange?.(nextValue);
         setOpen(false);
+        setQuery('');
     };
 
     return (
@@ -150,8 +194,29 @@ export default function LightSelect({
                     )}
                     style={fitContent && fitWidth ? { minWidth: fitWidth } : undefined}
                 >
-                    {options.map((option) => {
+                    {enableSearch && (
+                        <li className="light-select__search" role="presentation">
+                            <Search className="light-select__search-icon h-3.5 w-3.5" aria-hidden="true" />
+                            <input
+                                ref={searchRef}
+                                type="search"
+                                value={query}
+                                onChange={(event) => setQuery(event.target.value)}
+                                onKeyDown={(event) => event.stopPropagation()}
+                                placeholder={searchPlaceholder}
+                                className="light-select__search-input"
+                                aria-label={searchPlaceholder}
+                            />
+                        </li>
+                    )}
+
+                    {visibleOptions.length === 0 ? (
+                        <li className="light-select__empty" role="presentation">
+                            Aucun résultat
+                        </li>
+                    ) : visibleOptions.map((option) => {
                         const isSelected = option.value === value;
+                        const isPinned = pinnedValues.includes(option.value);
 
                         return (
                             <li key={option.value} role="presentation">
@@ -162,6 +227,7 @@ export default function LightSelect({
                                     className={cn(
                                         'ui-select-item light-select__item relative flex w-full cursor-default select-none items-center rounded-lg py-2 pl-8 pr-2 text-sm outline-none hover:bg-surface hover:text-primary focus:bg-surface focus:text-primary',
                                         isSelected && 'bg-surface/60 text-primary',
+                                        isPinned && 'light-select__item--pinned',
                                         itemClassName,
                                     )}
                                     onClick={() => handleSelect(option.value)}

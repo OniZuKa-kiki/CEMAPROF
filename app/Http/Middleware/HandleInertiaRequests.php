@@ -20,6 +20,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $settings = rescue(fn () => SiteSetting::allCached(), [], false);
 
         return [
             ...parent::share($request),
@@ -36,9 +37,9 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'import_errors' => fn () => $request->session()->get('import_errors'),
             ],
-            'siteSettings' => rescue(fn () => SiteSetting::allCached(), [], false),
-            'whatsappNumber' => rescue(fn () => SiteSetting::get('whatsapp') ?? config('cemaprof.whatsapp'), config('cemaprof.whatsapp'), false),
-            'company' => config('cemaprof.company'),
+            'siteSettings' => $settings,
+            'whatsappNumber' => $settings['whatsapp'] ?? config('cemaprof.whatsapp'),
+            'company' => $this->resolvedCompany($settings),
             'appUrl' => config('app.url'),
             'navCategories' => rescue(
                 fn () => CatalogCache::rememberArray('nav_categories', fn () => \App\Models\Category::query()
@@ -55,5 +56,25 @@ class HandleInertiaRequests extends Middleware
                     : 0,
             ],
         ];
+    }
+
+    private function resolvedCompany(array $settings): array
+    {
+        $defaults = config('cemaprof.company', []);
+        $activityLines = $defaults['activity_lines'] ?? [];
+
+        if (! empty($settings['activity_lines'])) {
+            $parsed = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $settings['activity_lines']))));
+            if ($parsed !== []) {
+                $activityLines = $parsed;
+            }
+        }
+
+        return array_merge($defaults, [
+            'tagline' => $settings['site_tagline'] ?? ($defaults['tagline'] ?? ''),
+            'description' => $settings['company_description'] ?? ($defaults['description'] ?? ''),
+            'maps_url' => $settings['google_maps_url'] ?? ($defaults['maps_url'] ?? ''),
+            'activity_lines' => $activityLines,
+        ]);
     }
 }

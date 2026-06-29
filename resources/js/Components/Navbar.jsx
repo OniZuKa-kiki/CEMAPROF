@@ -102,7 +102,7 @@ export default function Navbar() {
         >
             <div className="mx-auto flex h-[var(--site-navbar-main-height)] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
                 <Link href="/" onClick={(event) => handleNavClick(event, "/")} className="flex shrink-0 items-center">
-                    <SiteLogo size="sm" />
+                    <SiteLogo size="md" />
                 </Link>
 
                 <nav className="hidden items-center gap-0.5 lg:flex">
@@ -159,7 +159,7 @@ export default function Navbar() {
                         >
                             <SheetHeader className="border-b border-gray-100 pb-4 pr-10">
                                 <SheetTitle className="text-left">
-                                    <SiteLogo size="sm" />
+                                    <SiteLogo size="md" />
                                 </SheetTitle>
                             </SheetHeader>
                             <nav className="sheet-mobile-nav__links mt-6 flex flex-col gap-1">

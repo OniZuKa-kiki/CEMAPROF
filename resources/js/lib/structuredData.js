@@ -1,3 +1,5 @@
+import { LOGO_PATH } from '@/lib/siteAssets';
+
 const AVAILABILITY_MAP = {
     in_stock: 'https://schema.org/InStock',
     out_of_stock: 'https://schema.org/OutOfStock',
@@ -69,7 +71,7 @@ export function buildOrganizationSchema({ appUrl, company, siteSettings = {} }) 
         '@type': 'Organization',
         name,
         url: appUrl,
-        logo: `${appUrl}/images/logo.png`,
+        logo: `${appUrl}${LOGO_PATH}`,
         description: company?.description || company?.short_description,
     };
 

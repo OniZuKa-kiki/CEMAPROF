@@ -1,17 +1,19 @@
 import LightSelect from '@/Components/LightSelect';
 import { cn } from '@/lib/utils';
 
-export default function FormSelect({
+export default function AdminSelect({
     value,
     onValueChange,
     options = [],
     placeholder = 'Choisir…',
+    ariaLabel,
     id,
     className,
-    triggerClassName,
-    ariaLabel,
     searchable = false,
     pinnedValues = [],
+    searchPlaceholder = 'Rechercher…',
+    renderTrigger,
+    renderItem,
 }) {
     const safeValue = value === undefined || value === null || value === '' ? undefined : String(value);
 
@@ -26,11 +28,15 @@ export default function FormSelect({
             }))}
             placeholder={placeholder}
             ariaLabel={ariaLabel || placeholder}
-            triggerClassName={cn('ui-select-trigger', triggerClassName, className)}
-            contentClassName="form-select-content"
-            itemClassName="ui-select-item"
+            triggerClassName={cn('admin-select__trigger', className)}
+            contentClassName="admin-select__content"
+            itemClassName="admin-select__item"
+            fitContent
             searchable={searchable}
             pinnedValues={pinnedValues}
+            searchPlaceholder={searchPlaceholder}
+            renderTrigger={renderTrigger}
+            renderItem={renderItem}
         />
     );
 }

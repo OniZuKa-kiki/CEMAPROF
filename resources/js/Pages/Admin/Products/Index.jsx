@@ -2,15 +2,33 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Edit, FileUp, Plus, Trash2 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { AdminFilterBar, AdminFilterControls, AdminFilterReset, AdminFilterSearch } from '@/Components/Admin/AdminFilterBar';
+import AdminSelect from '@/Components/Admin/AdminSelect';
 import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Switch } from '@/Components/ui/switch';
 import { Badge } from '@/Components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import { Pagination } from '@/Components/ui/pagination';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/Components/ui/dialog';
 import { availabilityLabels, badgeLabels } from '@/lib/utils';
+
+const sortOptions = [
+    { value: 'recent', label: 'Plus récents' },
+    { value: 'name', label: 'Nom A → Z' },
+    { value: 'name_desc', label: 'Nom Z → A' },
+];
+
+const perPageOptions = [
+    { value: '25', label: '25 / page' },
+    { value: '50', label: '50 / page' },
+    { value: '100', label: '100 / page' },
+];
+
+const statusOptions = [
+    { value: 'all', label: 'Tous statuts' },
+    { value: 'active', label: 'Actifs' },
+    { value: 'inactive', label: 'Inactifs' },
+];
 
 export default function ProductsIndex({ products, categories, filters }) {
     const [deleteId, setDeleteId] = useState(null);
@@ -30,6 +48,25 @@ export default function ProductsIndex({ products, categories, filters }) {
             onFinish: () => setDeleteId(null),
         });
     };
+
+    const categoryOptions = [
+        { value: 'all', label: 'Toutes catégories' },
+        ...categories.map((c) => ({ value: String(c.id), label: c.name })),
+    ];
+
+    const badgeOptions = [
+        { value: 'all', label: 'Tous badges' },
+        ...Object.entries(badgeLabels).map(([value, label]) => ({ value, label })),
+    ];
+
+    const hasActiveFilters = Boolean(
+        filters.search
+        || filters.category_id
+        || filters.badge
+        || filters.status
+        || (filters.sort && filters.sort !== 'recent')
+        || (filters.per_page && String(filters.per_page) !== '25'),
+    );
 
     return (
         <AdminLayout title="Produits">
@@ -52,56 +89,55 @@ export default function ProductsIndex({ products, categories, filters }) {
                 </div>
             </div>
 
-            <div className="mb-6 flex flex-wrap gap-3">
-                <Input
-                    placeholder="Rechercher par nom..."
+            <AdminFilterBar>
+                <AdminFilterSearch
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-52"
-                    onKeyDown={(e) => e.key === 'Enter' && applyFilters({ search: search.trim() || undefined })}
+                    onSubmit={() => applyFilters({ search: search.trim() || undefined })}
+                    placeholder="Rechercher par nom..."
                 />
-                <Button variant="outline" size="sm" onClick={() => applyFilters({ search: search.trim() || undefined })}>
-                    Rechercher
-                </Button>
-                <Select value={filters.category_id || 'all'} onValueChange={(v) => applyFilters({ category_id: v === 'all' ? undefined : v })}>
-                    <SelectTrigger className="w-44"><SelectValue placeholder="Catégorie" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Toutes catégories</SelectItem>
-                        {categories.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                <Select value={filters.badge || 'all'} onValueChange={(v) => applyFilters({ badge: v === 'all' ? undefined : v })}>
-                    <SelectTrigger className="w-36"><SelectValue placeholder="Badge" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Tous badges</SelectItem>
-                        {Object.entries(badgeLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                <Select value={filters.status || 'all'} onValueChange={(v) => applyFilters({ status: v === 'all' ? undefined : v })}>
-                    <SelectTrigger className="w-32"><SelectValue placeholder="Statut" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Tous</SelectItem>
-                        <SelectItem value="active">Actifs</SelectItem>
-                        <SelectItem value="inactive">Inactifs</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={filters.sort || 'recent'} onValueChange={(v) => applyFilters({ sort: v })}>
-                    <SelectTrigger className="w-40"><SelectValue placeholder="Tri" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="recent">Plus récents</SelectItem>
-                        <SelectItem value="name">Nom A → Z</SelectItem>
-                        <SelectItem value="name_desc">Nom Z → A</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={String(filters.per_page || 25)} onValueChange={(v) => applyFilters({ per_page: v })}>
-                    <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="25">25 / page</SelectItem>
-                        <SelectItem value="50">50 / page</SelectItem>
-                        <SelectItem value="100">100 / page</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+                <AdminFilterControls>
+                    <AdminSelect
+                        ariaLabel="Filtrer par catégorie"
+                        value={filters.category_id || 'all'}
+                        onValueChange={(v) => applyFilters({ category_id: v === 'all' ? undefined : v })}
+                        options={categoryOptions}
+                        searchable={categories.length >= 12}
+                        className="admin-select__trigger--category"
+                    />
+                    <AdminSelect
+                        ariaLabel="Filtrer par badge"
+                        value={filters.badge || 'all'}
+                        onValueChange={(v) => applyFilters({ badge: v === 'all' ? undefined : v })}
+                        options={badgeOptions}
+                    />
+                    <AdminSelect
+                        ariaLabel="Filtrer par statut"
+                        value={filters.status || 'all'}
+                        onValueChange={(v) => applyFilters({ status: v === 'all' ? undefined : v })}
+                        options={statusOptions}
+                    />
+                    <AdminSelect
+                        ariaLabel="Trier les produits"
+                        value={filters.sort || 'recent'}
+                        onValueChange={(v) => applyFilters({ sort: v })}
+                        options={sortOptions}
+                    />
+                    <AdminSelect
+                        ariaLabel="Produits par page"
+                        value={String(filters.per_page || 25)}
+                        onValueChange={(v) => applyFilters({ per_page: v })}
+                        options={perPageOptions}
+                    />
+                </AdminFilterControls>
+                <AdminFilterReset
+                    visible={hasActiveFilters}
+                    onClick={() => {
+                        setSearch('');
+                        router.get('/admin/products', {}, { preserveState: true });
+                    }}
+                />
+            </AdminFilterBar>
 
             <div className="overflow-hidden rounded-2xl border bg-white shadow-card">
                 <Table>
@@ -113,14 +149,14 @@ export default function ProductsIndex({ products, categories, filters }) {
                             <TableHead>Disponibilité</TableHead>
                             <TableHead>Badge</TableHead>
                             <TableHead>Actif</TableHead>
-                            <TableHead>Vedette</TableHead>
+                            <TableHead>Phare</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {products.data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+                                <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
                                     Aucun produit trouvé. Modifiez les filtres ou importez un fichier CSV.
                                 </TableCell>
                             </TableRow>

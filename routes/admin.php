@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImportController;
@@ -27,6 +29,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('products/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
 
         Route::resource('categories', CategoryController::class)->except(['show']);
+
+        Route::get('brands', [BrandController::class, 'index'])->name('brands.index');
+        Route::post('brands', [BrandController::class, 'store'])->name('brands.store');
+        Route::delete('brands/{brand}', [BrandController::class, 'destroy'])->name('brands.destroy');
+
+        Route::get('content/faq', [ContentController::class, 'faq'])->name('content.faq');
+        Route::put('content/faq', [ContentController::class, 'updateFaq'])->name('content.faq.update');
+        Route::get('content/cgv', [ContentController::class, 'cgv'])->name('content.cgv');
+        Route::put('content/cgv', [ContentController::class, 'updateCgv'])->name('content.cgv.update');
+        Route::get('content/partner-brands', [ContentController::class, 'partnerBrands'])->name('content.partner-brands');
+        Route::post('content/partner-brands/catalog', [ContentController::class, 'storePartnerBrand'])->name('content.partner-brands.catalog.store');
+        Route::delete('content/partner-brands/catalog/{slug}', [ContentController::class, 'destroyPartnerBrand'])->name('content.partner-brands.catalog.destroy');
+        Route::put('content/partner-brands', [ContentController::class, 'updatePartnerBrands'])->name('content.partner-brands.update');
 
         Route::get('messages', [ContactMessageController::class, 'index'])->name('messages.index');
         Route::get('messages/{message}', [ContactMessageController::class, 'show'])->name('messages.show');

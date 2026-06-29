@@ -17,7 +17,7 @@ const badgeVariantMap = {
 
 const fallbackImage = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80';
 
-export default function ProductListRow({ product, className }) {
+export default function ProductListRow({ product, className, animate = true }) {
     const { toast } = useToast();
     const { items, addItem } = useQuoteCart();
     const cartItem = items.find((item) => item.slug === product.slug);
@@ -49,7 +49,7 @@ export default function ProductListRow({ product, className }) {
     };
 
     return (
-        <article className={cn('product-list-row group reveal-on-scroll', className)}>
+        <article className={cn('product-list-row group', animate && 'reveal-on-scroll', className)}>
             <Link href={`/produits/${product.slug}`} className="product-list-row__image product-card__media">
                 <img
                     src={product.image_url || fallbackImage}

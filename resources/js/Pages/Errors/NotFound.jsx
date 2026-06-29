@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { Home } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
+import SiteLogo from '@/Components/SiteLogo';
 import { PageHero } from '@/Components/PageHero';
 import { Button } from '@/Components/ui/button';
 
@@ -16,7 +17,7 @@ export default function NotFound() {
             />
 
             <div className="container-wide section-py text-center">
-                <img src="/images/logo.png" alt="CEMAPROF" className="mx-auto mb-8 h-20 w-auto opacity-80" />
+                <SiteLogo size="lg" className="mx-auto mb-8 opacity-90" />
                 <p className="error-code">404</p>
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
                     <Button asChild>

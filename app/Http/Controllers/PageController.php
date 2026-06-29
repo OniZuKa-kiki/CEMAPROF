@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SiteContent;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,11 +22,15 @@ class PageController extends Controller
 
     public function faq(): Response
     {
-        return Inertia::render('Legal/Faq');
+        return Inertia::render('Legal/Faq', [
+            'items' => SiteContent::faqItems(),
+        ]);
     }
 
     public function cgv(): Response
     {
-        return Inertia::render('Legal/Cgv');
+        return Inertia::render('Legal/Cgv', [
+            'sections' => SiteContent::cgvSections(),
+        ]);
     }
 }

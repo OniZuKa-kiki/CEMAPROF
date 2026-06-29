@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
+import { subjectOptions } from '@/lib/utils';
+
+const subjectLabels = Object.fromEntries(subjectOptions.map((o) => [o.value, o.label]));
 
 function KpiCard({ title, value, icon: Icon, color }) {
     return (
@@ -53,7 +56,7 @@ export default function Dashboard({ stats, recentMessages, recentProducts }) {
                                 {recentMessages.map((msg) => (
                                     <TableRow key={msg.id}>
                                         <TableCell className="font-medium">{msg.name}</TableCell>
-                                        <TableCell>{msg.subject}</TableCell>
+                                        <TableCell>{subjectLabels[msg.subject] || msg.subject}</TableCell>
                                         <TableCell>
                                             <Badge variant={msg.is_read ? 'secondary' : 'accent'}>
                                                 {msg.is_read ? 'Lu' : 'Non lu'}

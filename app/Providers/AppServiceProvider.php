@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Observers\CatalogCacheObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
@@ -22,12 +24,15 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        App::setLocale((string) config('app.locale', 'fr'));
+
         Vite::prefetch(concurrency: 3);
 
         Password::defaults(fn () => Password::min(10)->letters()->mixedCase()->numbers());
 
         Product::observe(CatalogCacheObserver::class);
         Category::observe(CatalogCacheObserver::class);
+        Brand::observe(CatalogCacheObserver::class);
 
         if ($this->app->environment('production')) {
             URL::forceScheme('https');

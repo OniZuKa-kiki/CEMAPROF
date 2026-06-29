@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { partnerBrands, getBrandLogoSources, getBrandScale } from '@/lib/brandLogos';
+import { getBrandLogoSources, getBrandScale } from '@/lib/brandLogos';
 
 function BrandLogo({ brand }) {
     const sources = getBrandLogoSources(brand);
@@ -26,13 +26,17 @@ function BrandLogo({ brand }) {
     );
 }
 
-export default function BrandMarquee() {
+export default function BrandMarquee({ brands = [] }) {
     const trackRef = useRef(null);
     const offsetRef = useRef(0);
     const pausedRef = useRef(false);
-    const track = [...partnerBrands, ...partnerBrands, ...partnerBrands, ...partnerBrands];
+    const track = brands.length ? [...brands, ...brands, ...brands, ...brands] : [];
 
     useEffect(() => {
+        if (!brands.length) {
+            return undefined;
+        }
+
         let frameId = 0;
         let lastTime = 0;
         const speed = 42;
@@ -67,7 +71,11 @@ export default function BrandMarquee() {
         frameId = requestAnimationFrame(step);
 
         return () => cancelAnimationFrame(frameId);
-    }, []);
+    }, [brands]);
+
+    if (!brands.length) {
+        return null;
+    }
 
     return (
         <section className="brand-marquee" aria-label="Marques partenaires">

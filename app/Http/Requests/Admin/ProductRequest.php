@@ -35,4 +35,20 @@ class ProductRequest extends FormRequest
             'remove_gallery.*' => ['string'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Le nom du produit est obligatoire.',
+            'slug.required' => 'Le slug est obligatoire.',
+            'slug.unique' => 'Ce slug est déjà utilisé par un autre produit.',
+            'category_id.required' => 'La catégorie est obligatoire.',
+            'category_id.exists' => 'La catégorie sélectionnée est invalide.',
+            'price.numeric' => 'Le prix doit être un nombre.',
+            'price.min' => 'Le prix ne peut pas être négatif.',
+            'image.image' => 'Le fichier doit être une image.',
+            'image.max' => 'L\'image ne peut pas dépasser 5 Mo.',
+            'gallery.*.image' => 'Chaque fichier de la galerie doit être une image.',
+        ];
+    }
 }

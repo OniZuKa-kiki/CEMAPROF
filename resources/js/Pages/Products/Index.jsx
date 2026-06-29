@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { smoothScrollToTop } from '@/lib/smoothScroll';
+import { initScrollReveal } from '@/lib/scrollReveal';
 
 import {
 
@@ -187,6 +188,8 @@ function CatalogFilterBar({ categories, brands, priceBounds, filters, filterCoun
                         ariaLabel="Trier les produits"
 
                         fitContent={showToolbar}
+
+                        searchable={false}
 
                         triggerClassName="catalog-sort-trigger"
 
@@ -400,6 +403,14 @@ export default function ProductsIndex({ products, categories, brands, priceBound
 
 
 
+    const finishCatalogNavigation = (scrollToTop = false) => {
+        setCatalogBusy(false);
+        requestAnimationFrame(() => initScrollReveal());
+        if (scrollToTop) {
+            smoothScrollToTop(800);
+        }
+    };
+
     const visitCatalog = (params, { scrollToTop = false } = {}) => {
 
         setCatalogBusy(true);
@@ -412,17 +423,7 @@ export default function ProductsIndex({ products, categories, brands, priceBound
 
             only: ['products', 'filters'],
 
-            onFinish: () => {
-
-                setCatalogBusy(false);
-
-                if (scrollToTop) {
-
-                    smoothScrollToTop(800);
-
-                }
-
-            },
+            onFinish: () => finishCatalogNavigation(scrollToTop),
 
         });
 
@@ -442,13 +443,7 @@ export default function ProductsIndex({ products, categories, brands, priceBound
 
             only: ['products', 'filters'],
 
-            onFinish: () => {
-
-                setCatalogBusy(false);
-
-                smoothScrollToTop(800);
-
-            },
+            onFinish: () => finishCatalogNavigation(true),
 
         });
 
@@ -498,7 +493,7 @@ export default function ProductsIndex({ products, categories, brands, priceBound
 
             only: ['products', 'filters'],
 
-            onFinish: () => setCatalogBusy(false),
+            onFinish: () => finishCatalogNavigation(),
 
         });
 
@@ -665,7 +660,7 @@ export default function ProductsIndex({ products, categories, brands, priceBound
 
                                         {products.data.map((product) => (
 
-                                            <ProductCard key={product.id} product={product} compact />
+                                            <ProductCard key={product.id} product={product} compact animate={false} />
 
                                         ))}
 
@@ -677,7 +672,7 @@ export default function ProductsIndex({ products, categories, brands, priceBound
 
                                         {products.data.map((product) => (
 
-                                            <ProductListRow key={product.id} product={product} />
+                                            <ProductListRow key={product.id} product={product} animate={false} />
 
                                         ))}
 

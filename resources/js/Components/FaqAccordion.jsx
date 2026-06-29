@@ -3,37 +3,26 @@ import { Link } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
     ChevronDown,
-    CreditCard,
     HelpCircle,
-    MapPin,
-    MessageCircle,
-    Package,
     Search,
-    Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { matchesSearch } from '@/lib/searchNormalize';
+import { faqIconMap } from '@/lib/faqIcons';
 
-const iconMap = {
-    products: Package,
-    quote: MessageCircle,
-    pricing: CreditCard,
-    delivery: Truck,
-    location: MapPin,
-    advice: HelpCircle,
-    payment: CreditCard,
-};
+const iconMap = faqIconMap;
 
 export default function FaqAccordion({ items = [] }) {
     const [openKey, setOpenKey] = useState(items[0]?.q ?? null);
     const [query, setQuery] = useState('');
 
     const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
+        const q = query.trim();
         if (!q) {
             return items;
         }
         return items.filter(
-            (item) => item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q),
+            (item) => matchesSearch(item.q, q) || matchesSearch(item.a, q),
         );
     }, [items, query]);
 

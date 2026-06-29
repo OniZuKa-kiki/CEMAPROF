@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Check, FileText, Plus } from 'lucide-react';
+import { Check, ChevronDown, FileText, Plus } from 'lucide-react';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import QuantityStepper from '@/Components/QuantityStepper';
@@ -15,12 +15,14 @@ const badgeVariantMap = {
     promo: 'promo',
 };
 
-export default function ProductCard({ product, className, compact = false }) {
+export default function ProductCard({ product, className, compact = false, animate = true }) {
     const { toast } = useToast();
     const { items, addItem } = useQuoteCart();
     const cartItem = items.find((item) => item.slug === product.slug);
     const inCart = Boolean(cartItem);
     const [quantity, setQuantity] = useState(cartItem?.quantity || 1);
+    const [descOpen, setDescOpen] = useState(false);
+    const hasDescription = Boolean(product.short_description);
 
     useEffect(() => {
         setQuantity(cartItem?.quantity || 1);
@@ -47,7 +49,13 @@ export default function ProductCard({ product, className, compact = false }) {
     };
 
     return (
-        <article className={cn('product-card product-card--v2 group reveal-on-scroll', compact && 'product-card--compact', className)}>
+        <article className={cn(
+            'product-card product-card--v2 group',
+            animate && 'reveal-on-scroll',
+            compact && 'product-card--compact',
+            compact && descOpen && 'product-card--desc-open',
+            className,
+        )}>
             <Link href={`/produits/${product.slug}`} className="product-image-wrap product-card__media relative block">
                 <img
                     src={product.image_url || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80'}
@@ -72,10 +80,23 @@ export default function ProductCard({ product, className, compact = false }) {
                         {product.name}
                     </h3>
                 </Link>
-                {product.short_description && (
-                    <p className="product-card__desc mt-2 line-clamp-2 flex-1 text-sm text-muted-foreground">
-                        {product.short_description}
-                    </p>
+                {hasDescription && (
+                    <>
+                        <p className="product-card__desc mt-2 line-clamp-2 flex-1 text-sm text-muted-foreground">
+                            {product.short_description}
+                        </p>
+                        {compact && (
+                            <button
+                                type="button"
+                                className="product-card__desc-toggle"
+                                onClick={() => setDescOpen((open) => !open)}
+                                aria-expanded={descOpen}
+                            >
+                                {descOpen ? 'Masquer la description' : 'Voir la description'}
+                                <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', descOpen && 'rotate-180')} />
+                            </button>
+                        )}
+                    </>
                 )}
                 {displayPrice ? (
                     <p className="mt-3 text-lg font-bold text-primary">{displayPrice}</p>

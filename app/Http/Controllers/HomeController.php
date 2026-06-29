@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CatalogCache;
+use App\Services\SiteContent;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -32,6 +33,7 @@ class HomeController extends Controller
                 ['label' => 'Clients', 'value' => 1000, 'suffix' => '+'],
                 ['label' => 'Marques', 'value' => 50, 'suffix' => '+'],
             ],
+            'partnerBrands' => SiteContent::partnerBrandsForMarquee(),
         ]);
     }
 }

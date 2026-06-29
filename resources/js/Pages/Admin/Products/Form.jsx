@@ -6,7 +6,8 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Textarea } from '@/Components/ui/textarea';
 import { Label } from '@/Components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
+import BrandField from '@/Components/Admin/BrandField';
+import FormSelect from '@/Components/FormSelect';
 import { Switch } from '@/Components/ui/switch';
 import { Card, CardContent } from '@/Components/ui/card';
 import { slugify, badgeLabels, availabilityLabels } from '@/lib/utils';
@@ -94,12 +95,13 @@ export default function ProductForm({ product, categories, brandOptions = [] }) 
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Catégorie *</Label>
-                                    <Select value={data.category_id} onValueChange={(v) => setData('category_id', v)}>
-                                        <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
-                                        <SelectContent>
-                                            {categories.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormSelect
+                                        value={data.category_id}
+                                        onValueChange={(v) => setData('category_id', v)}
+                                        options={categories.map((c) => ({ value: String(c.id), label: c.name }))}
+                                        placeholder="Choisir..."
+                                        searchable={categories.length >= 12}
+                                    />
                                     {errors.category_id && <p className="text-sm text-accent">{errors.category_id}</p>}
                                 </div>
                                 <div className="grid gap-5 sm:grid-cols-2">
@@ -160,32 +162,19 @@ export default function ProductForm({ product, categories, brandOptions = [] }) 
                                         </div>
                                     )}
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Marque</Label>
-                                    <Select
-                                        value={data.brand || 'none'}
-                                        onValueChange={(v) => setData('brand', v === 'none' ? '' : v)}
-                                    >
-                                        <SelectTrigger><SelectValue placeholder="Choisir une marque..." /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">Aucune</SelectItem>
-                                            {brandOptions.map((name) => (
-                                                <SelectItem key={name} value={name}>{name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.brand && <p className="text-sm text-accent">{errors.brand}</p>}
-                                </div>
+                                <BrandField
+                                    value={data.brand}
+                                    onChange={(brand) => setData('brand', brand)}
+                                    brandOptions={brandOptions}
+                                    error={errors.brand}
+                                />
                                 <div className="space-y-2">
                                     <Label>Disponibilité</Label>
-                                    <Select value={data.availability} onValueChange={(v) => setData('availability', v)}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            {Object.entries(availabilityLabels).map(([k, v]) => (
-                                                <SelectItem key={k} value={k}>{v}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormSelect
+                                        value={data.availability}
+                                        onValueChange={(v) => setData('availability', v)}
+                                        options={Object.entries(availabilityLabels).map(([value, label]) => ({ value, label }))}
+                                    />
                                     {errors.availability && <p className="text-sm text-accent">{errors.availability}</p>}
                                 </div>
                                 <div className="space-y-2">
@@ -193,18 +182,19 @@ export default function ProductForm({ product, categories, brandOptions = [] }) 
                                     <p className="text-xs text-muted-foreground">
                                         Étiquette affichée sur la fiche produit. Reste jusqu&apos;à ce que vous la changiez manuellement.
                                     </p>
-                                    <Select value={data.badge || 'none'} onValueChange={(v) => setData('badge', v === 'none' ? '' : v)}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">Aucun</SelectItem>
-                                            {Object.entries(badgeLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormSelect
+                                        value={data.badge || 'none'}
+                                        onValueChange={(v) => setData('badge', v === 'none' ? '' : v)}
+                                        options={[
+                                            { value: 'none', label: 'Aucun' },
+                                            ...Object.entries(badgeLabels).map(([value, label]) => ({ value, label })),
+                                        ]}
+                                    />
                                 </div>
                                 <div className="flex items-center justify-between gap-4">
                                     <div>
-                                        <Label>Produit vedette</Label>
-                                        <p className="text-xs text-muted-foreground">Affiché sur la page d&apos;accueil</p>
+                                        <Label>Produit phare</Label>
+                                        <p className="text-xs text-muted-foreground">Affiché dans les produits phares de la page d&apos;accueil</p>
                                     </div>
                                     <Switch checked={data.is_featured} onCheckedChange={(v) => setData('is_featured', v)} />
                                 </div>

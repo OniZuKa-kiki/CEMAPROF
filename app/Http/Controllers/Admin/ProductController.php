@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\AuditLogger;
@@ -57,7 +58,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Form', [
             'product' => null,
             'categories' => Category::orderBy('name')->get(['id', 'name']),
-            'brandOptions' => config('cemaprof.partner_brands', []),
+            'brandOptions' => Brand::orderBy('name')->pluck('name'),
         ]);
     }
 
@@ -74,6 +75,7 @@ class ProductController extends Controller
         }
 
         $product = Product::create($data);
+        $this->syncBrandRegistry($data['brand'] ?? null);
 
         AuditLogger::log('product.created', 'product', $product->id, [
             'name' => $product->name,
@@ -88,7 +90,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Form', [
             'product' => $product->load('category'),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
-            'brandOptions' => config('cemaprof.partner_brands', []),
+            'brandOptions' => Brand::orderBy('name')->pluck('name'),
         ]);
     }
 
@@ -117,6 +119,7 @@ class ProductController extends Controller
         $data['images'] = $images ?: null;
 
         $product->update($data);
+        $this->syncBrandRegistry($data['brand'] ?? null);
 
         AuditLogger::log('product.updated', 'product', $product->id, [
             'name' => $product->name,
@@ -180,5 +183,16 @@ class ProductController extends Controller
             'is_featured' => $request->boolean('is_featured'),
             'is_active' => $request->boolean('is_active', true),
         ];
+    }
+
+    private function syncBrandRegistry(?string $brand): void
+    {
+        $name = trim((string) $brand);
+
+        if ($name === '') {
+            return;
+        }
+
+        Brand::firstOrCreate(['name' => $name]);
     }
 }

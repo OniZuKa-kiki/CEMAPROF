@@ -26,6 +26,10 @@ export const partnerBrands = [
 ];
 
 export function getBrandLogoSources(brand) {
+    if (brand.url) {
+        return [brand.url];
+    }
+
     const file = brand.file || `${brand.slug}.png`;
 
     return [`/images/brands/${encodeURIComponent(file)}`];
